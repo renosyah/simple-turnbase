@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/desert_mountain.obj-f34b90872ca84cd198e832d8f3f99046.mesh"
+
+[deps]
+
+files=[ "res://.import/desert_mountain.obj-f34b90872ca84cd198e832d8f3f99046.mesh" ]
+
+source_file="res://assets/terrains/model/desert_mountain.obj"
+dest_files=[ "res://.import/desert_mountain.obj-f34b90872ca84cd198e832d8f3f99046.mesh", "res://.import/desert_mountain.obj-f34b90872ca84cd198e832d8f3f99046.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

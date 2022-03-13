@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/Yeti.obj-acfb57c37db15e63f149b0b2b84deef1.mesh"
+
+[deps]
+
+files=[ "res://.import/Yeti.obj-acfb57c37db15e63f149b0b2b84deef1.mesh" ]
+
+source_file="res://scene/unit/models/Yeti.obj"
+dest_files=[ "res://.import/Yeti.obj-acfb57c37db15e63f149b0b2b84deef1.mesh", "res://.import/Yeti.obj-acfb57c37db15e63f149b0b2b84deef1.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

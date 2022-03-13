@@ -1,0 +1,45 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/terrains/terrain.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/gameplay-camera/gameplay_camera.tscn" type="PackedScene" id=2]
+[ext_resource path="res://map/multi-player/ui/ui.tscn" type="PackedScene" id=3]
+[ext_resource path="res://map/multi-player/host/battle.gd" type="Script" id=4]
+
+[sub_resource type="ProceduralSky" id=1]
+
+[sub_resource type="Environment" id=2]
+background_mode = 3
+background_sky = SubResource( 1 )
+background_color = Color( 0.254902, 0.823529, 1, 1 )
+
+[node name="battle" type="Node"]
+script = ExtResource( 4 )
+
+[node name="unit_holder" type="Node" parent="."]
+
+[node name="spawn_delay" type="Timer" parent="."]
+wait_time = 0.8
+one_shot = true
+
+[node name="bot" type="Timer" parent="."]
+autostart = true
+
+[node name="terrain" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0 )
+
+[node name="cameraPivot" parent="." instance=ExtResource( 2 )]
+
+[node name="ui" parent="." instance=ExtResource( 3 )]
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 40, 10 )
+light_energy = 1.6
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 2 )
+
+[connection signal="timeout" from="bot" to="." method="_on_bot_timeout"]
+[connection signal="on_finish_generate" from="terrain" to="." method="_on_terrain_on_finish_generate"]
+[connection signal="on_grid_click" from="terrain" to="." method="_on_terrain_on_grid_click"]
+[connection signal="on_spawning_grid" from="terrain" to="." method="_on_terrain_on_spawning_grid"]
+[connection signal="on_terrain_ready" from="terrain" to="." method="_on_terrain_on_terrain_ready"]

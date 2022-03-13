@@ -1,0 +1,76 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://assets/ui/server-browser/server_browser.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=2]
+[ext_resource path="res://menu/main-menu/ui.gd" type="Script" id=3]
+
+[node name="main_menu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="control" type="Control" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/control"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -300.0
+margin_top = -224.0
+margin_right = 300.0
+margin_bottom = -124.0
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="host" type="Button" parent="CanvasLayer/control/HBoxContainer"]
+margin_left = 41.0
+margin_right = 291.0
+margin_bottom = 100.0
+rect_min_size = Vector2( 250, 100 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = ExtResource( 2 )
+text = "Host"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/control/HBoxContainer"]
+margin_left = 295.0
+margin_right = 305.0
+margin_bottom = 100.0
+rect_min_size = Vector2( 10, 0 )
+
+[node name="join" type="Button" parent="CanvasLayer/control/HBoxContainer"]
+margin_left = 309.0
+margin_right = 559.0
+margin_bottom = 100.0
+rect_min_size = Vector2( 250, 100 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = ExtResource( 2 )
+text = "Join"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="server_browser" parent="CanvasLayer" instance=ExtResource( 1 )]
+visible = false
+
+[connection signal="pressed" from="CanvasLayer/control/HBoxContainer/host" to="." method="_on_host_pressed"]
+[connection signal="pressed" from="CanvasLayer/control/HBoxContainer/join" to="." method="_on_join_pressed"]
+[connection signal="close" from="CanvasLayer/server_browser" to="." method="_on_server_browser_close"]
+[connection signal="on_error" from="CanvasLayer/server_browser" to="." method="_on_server_browser_on_error"]
+[connection signal="on_join" from="CanvasLayer/server_browser" to="." method="_on_server_browser_on_join"]

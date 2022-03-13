@@ -1,0 +1,71 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=1]
+[ext_resource path="res://map/multi-player/ui/ui.gd" type="Script" id=2]
+[ext_resource path="res://assets/ui/bar/bar_over.png" type="Texture" id=3]
+[ext_resource path="res://assets/ui/bar/bar.png" type="Texture" id=4]
+
+[node name="ui" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="loading" type="Control" parent="CanvasLayer"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/loading"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.0980392, 0.0980392, 0.0980392, 0.784314 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/loading"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -206.5
+margin_top = -47.0
+margin_right = 206.5
+margin_bottom = 47.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="CanvasLayer/loading/VBoxContainer"]
+margin_right = 413.0
+margin_bottom = 40.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 1 )
+text = "Generating Map..."
+align = 1
+valign = 1
+
+[node name="loading_bar" type="TextureProgress" parent="CanvasLayer/loading/VBoxContainer"]
+margin_top = 44.0
+margin_right = 413.0
+margin_bottom = 94.0
+rect_min_size = Vector2( 0, 50 )
+max_value = 0.0
+step = 0.5
+texture_over = ExtResource( 3 )
+texture_progress = ExtResource( 4 )
+tint_progress = Color( 0.14902, 1, 0, 1 )
+nine_patch_stretch = true
+__meta__ = {
+"_edit_use_anchors_": false,
+"_editor_description_": ""
+}

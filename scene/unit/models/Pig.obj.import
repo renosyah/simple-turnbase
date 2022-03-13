@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/Pig.obj-019c51ed06b3fa7b3b1345caa6167b78.mesh"
+
+[deps]
+
+files=[ "res://.import/Pig.obj-019c51ed06b3fa7b3b1345caa6167b78.mesh" ]
+
+source_file="res://scene/unit/models/Pig.obj"
+dest_files=[ "res://.import/Pig.obj-019c51ed06b3fa7b3b1345caa6167b78.mesh", "res://.import/Pig.obj-019c51ed06b3fa7b3b1345caa6167b78.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

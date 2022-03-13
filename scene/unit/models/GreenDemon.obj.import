@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/GreenDemon.obj-ec0c3d1df3be2bd5a75034ca0fb90bf6.mesh"
+
+[deps]
+
+files=[ "res://.import/GreenDemon.obj-ec0c3d1df3be2bd5a75034ca0fb90bf6.mesh" ]
+
+source_file="res://scene/unit/models/GreenDemon.obj"
+dest_files=[ "res://.import/GreenDemon.obj-ec0c3d1df3be2bd5a75034ca0fb90bf6.mesh", "res://.import/GreenDemon.obj-ec0c3d1df3be2bd5a75034ca0fb90bf6.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

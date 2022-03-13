@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/Cyclops.obj-61d9f8fef53eb5ad584884ef71b42448.mesh"
+
+[deps]
+
+files=[ "res://.import/Cyclops.obj-61d9f8fef53eb5ad584884ef71b42448.mesh" ]
+
+source_file="res://scene/unit/models/Cyclops.obj"
+dest_files=[ "res://.import/Cyclops.obj-61d9f8fef53eb5ad584884ef71b42448.mesh", "res://.import/Cyclops.obj-61d9f8fef53eb5ad584884ef71b42448.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

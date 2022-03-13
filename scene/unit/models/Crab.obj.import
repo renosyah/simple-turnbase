@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/Crab.obj-cb05ca2fdd3ac963e5c8ab14569cb388.mesh"
+
+[deps]
+
+files=[ "res://.import/Crab.obj-cb05ca2fdd3ac963e5c8ab14569cb388.mesh" ]
+
+source_file="res://scene/unit/models/Crab.obj"
+dest_files=[ "res://.import/Crab.obj-cb05ca2fdd3ac963e5c8ab14569cb388.mesh", "res://.import/Crab.obj-cb05ca2fdd3ac963e5c8ab14569cb388.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286

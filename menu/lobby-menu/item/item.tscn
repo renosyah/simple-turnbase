@@ -1,0 +1,102 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_16.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=2]
+[ext_resource path="res://menu/lobby-menu/item/item.gd" type="Script" id=3]
+[ext_resource path="res://menu/lobby-menu/item/close.png" type="Texture" id=4]
+
+[node name="item" type="Control"]
+anchor_right = 1.0
+margin_bottom = 130.0
+rect_min_size = Vector2( 600, 130 )
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 20.0
+margin_top = 17.0
+margin_right = -35.0
+margin_bottom = -16.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="team_color" type="ColorRect" parent="Panel/HBoxContainer"]
+visible = false
+margin_right = 100.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 100, 50 )
+color = Color( 0.215686, 0.215686, 0.215686, 1 )
+
+[node name="MarginContainer2" type="MarginContainer" parent="Panel/HBoxContainer"]
+margin_right = 10.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 10, 0 )
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel/HBoxContainer"]
+margin_left = 14.0
+margin_right = 145.0
+margin_bottom = 97.0
+
+[node name="player_name" type="Label" parent="Panel/HBoxContainer/VBoxContainer"]
+margin_right = 131.0
+margin_bottom = 40.0
+custom_fonts/font = ExtResource( 2 )
+text = "..."
+
+[node name="Label" type="Label" parent="Panel/HBoxContainer/VBoxContainer"]
+margin_top = 44.0
+margin_right = 131.0
+margin_bottom = 72.0
+custom_colors/font_color = Color( 0.564706, 0.564706, 0.564706, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 1 )
+text = "Not Ready"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="Panel/HBoxContainer"]
+margin_left = 149.0
+margin_right = 451.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 100, 0 )
+mouse_filter = 2
+size_flags_horizontal = 3
+
+[node name="panel" type="MarginContainer" parent="Panel/HBoxContainer"]
+margin_left = 455.0
+margin_right = 545.0
+margin_bottom = 97.0
+rect_min_size = Vector2( 90, 0 )
+
+[node name="kick_player" type="Button" parent="Panel/HBoxContainer/panel"]
+margin_right = 90.0
+margin_bottom = 97.0
+flat = true
+
+[node name="TextureRect" type="TextureRect" parent="Panel/HBoxContainer/panel/kick_player"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 4 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="Panel/HBoxContainer/panel/kick_player" to="." method="_on_kick_player_pressed"]

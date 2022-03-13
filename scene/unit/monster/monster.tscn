@@ -1,0 +1,197 @@
+[gd_scene load_steps=17 format=2]
+
+[ext_resource path="res://scene/unit/models/Mushroom.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://scene/unit/monster/monster.gd" type="Script" id=2]
+[ext_resource path="res://assets/ui/bar-3d/hp_bar_3d.tscn" type="PackedScene" id=4]
+
+[sub_resource type="Animation" id=3]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("pivot:translation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0.1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("pivot:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector3( 45.497, 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=13]
+resource_name = "die"
+tracks/0/type = "value"
+tracks/0/path = NodePath("pivot:translation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.5, 0.8 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0.1, 0 ), Vector3( 0, 0.26005, 0 ), Vector3( 0, 0.158599, 0 ), Vector3( 0, 0.1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("pivot:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5, 0.8 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 45.497, 0, 0 ), Vector3( 90, 0, 0 ) ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0.9 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "_on_finish_dead"
+} ]
+}
+
+[sub_resource type="Animation" id=4]
+resource_name = "iddle"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("pivot:translation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0, 0.02, 0 ), Vector3( 0, 0.03, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("pivot:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=5]
+resource_name = "walking"
+length = 0.6
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("pivot:translation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.3, 0.5 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 0, 0.1, 0 ), Vector3( 0, 0, 0 ), Vector3( 0, 0.1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("pivot:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ) ]
+}
+
+[sub_resource type="AnimationNodeAnimation" id=14]
+animation = "die"
+
+[sub_resource type="AnimationNodeAnimation" id=8]
+animation = "iddle"
+
+[sub_resource type="AnimationNodeAnimation" id=9]
+animation = "walking"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=10]
+switch_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=11]
+switch_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=15]
+
+[sub_resource type="AnimationNodeStateMachine" id=6]
+states/die/node = SubResource( 14 )
+states/die/position = Vector2( 225, 134 )
+states/iddle/node = SubResource( 8 )
+states/iddle/position = Vector2( 102, 45 )
+states/walking/node = SubResource( 9 )
+states/walking/position = Vector2( 365, 45 )
+transitions = [ "iddle", "walking", SubResource( 10 ), "walking", "iddle", SubResource( 11 ), "iddle", "die", SubResource( 15 ) ]
+start_node = "iddle"
+
+[sub_resource type="AnimationNodeStateMachinePlayback" id=7]
+
+[sub_resource type="CapsuleShape" id=16]
+radius = 0.171381
+height = 0.254253
+
+[node name="monster" type="KinematicBody"]
+script = ExtResource( 2 )
+
+[node name="pivot" type="Spatial" parent="."]
+transform = Transform( 0.3, 0, 0, 0, 0.210284, -0.213964, 0, 0.213964, 0.210284, 0, 0.1, 0 )
+
+[node name="MeshInstance" type="MeshInstance" parent="pivot"]
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0 )
+mesh = ExtResource( 1 )
+skeleton = NodePath("../..")
+software_skinning_transform_normals = false
+material/0 = null
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 3 )
+anims/die = SubResource( 13 )
+anims/iddle = SubResource( 4 )
+anims/walking = SubResource( 5 )
+
+[node name="AnimationTree" type="AnimationTree" parent="."]
+tree_root = SubResource( 6 )
+anim_player = NodePath("../AnimationPlayer")
+active = true
+parameters/playback = SubResource( 7 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.332975, 0 )
+shape = SubResource( 16 )
+
+[node name="hpBar" parent="." instance=ExtResource( 4 )]
+transform = Transform( 0.114856, 0, 0, 0, 0.220672, 0, 0, 0, 1, 0, 0.914863, 0 )
+
+[node name="Tween" type="Tween" parent="."]

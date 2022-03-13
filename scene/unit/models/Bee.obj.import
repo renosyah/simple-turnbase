@@ -1,0 +1,20 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/Bee.obj-cc194bbd315eade11e52be1a261eac55.mesh"
+
+[deps]
+
+files=[ "res://.import/Bee.obj-cc194bbd315eade11e52be1a261eac55.mesh" ]
+
+source_file="res://scene/unit/models/Bee.obj"
+dest_files=[ "res://.import/Bee.obj-cc194bbd315eade11e52be1a261eac55.mesh", "res://.import/Bee.obj-cc194bbd315eade11e52be1a261eac55.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+octahedral_compression=true
+optimize_mesh_flags=4286
