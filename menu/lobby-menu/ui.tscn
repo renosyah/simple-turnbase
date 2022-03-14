@@ -25,17 +25,17 @@ __meta__ = {
 }
 
 [node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/control"]
-anchor_left = 0.5
-anchor_right = 0.5
-margin_left = -300.0
-margin_right = 300.0
-margin_bottom = 735.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_bottom = -283.0
 scroll_horizontal_enabled = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/control/ScrollContainer"]
+margin_right = 600.0
+size_flags_horizontal = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/control"]
 anchor_left = 0.5
