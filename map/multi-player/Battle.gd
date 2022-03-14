@@ -229,9 +229,9 @@ remote func _move_unit(_unit_path : NodePath, _terrain_path : NodePath, from, to
 	
 ############################################################
 # unit and grid selection
-func clear_selected_unit() -> bool:
+func clear_selected_unit(_terrain : Spatial) -> bool:
 	if is_instance_valid(selected_unit):
-		for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.travel_distance):
+		for i in _terrain.get_grids():
 			i.highlight(false)
 			
 		selected_unit = null
@@ -243,7 +243,7 @@ func highlight_near_adjacent_from(_unit : Unit):
 		return
 		
 	selected_unit = _unit
-	for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.travel_distance):
+	for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.ap):
 		i.highlight(true, Color.white if i.is_walkable else Color.red)
 
 

@@ -29,7 +29,6 @@ var gravity = 75.0
 var speed = 2.0
 var turning_speed = 6.0
 var offset_distance = 0.25
-var travel_distance : int = 2
 
 # firepower
 var attack_damage : int = 1

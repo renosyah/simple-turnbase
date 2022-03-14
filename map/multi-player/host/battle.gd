@@ -47,13 +47,13 @@ func _on_terrain_on_grid_click(_node : StaticBody):
 				_node.axial_coordinate
 			)
 		
-	if .clear_selected_unit():
+	if .clear_selected_unit(_terrain):
 		return
 	
 ############################################################
 # unit
 func _on_unit_on_click(_unit : Unit):
-	if .clear_selected_unit():
+	if .clear_selected_unit(_terrain):
 		return
 		
 	.highlight_near_adjacent_from(_unit)

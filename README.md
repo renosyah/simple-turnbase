@@ -19,7 +19,28 @@ link : (not release)
 
 
 ## Gameplay
-![GitHub Logo](/ss/1.png)
+![GitHub Logo](/ss/2.png)
+
+
+
+![GitHub Logo](/ss/3.png)
+
+
+
+![GitHub Logo](/ss/4.png)
+
+
+
+![GitHub Logo](/ss/5.png)
+
+
+
+![GitHub Logo](/ss/6.png)
+
+
+
+![GitHub Logo](/ss/7.png)
+
 
 
 
