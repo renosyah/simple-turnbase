@@ -81,6 +81,11 @@ func _init_host():
 	
 func _server_player_connected(_player_network_unique_id : int, _player : Dictionary):
 	_request_append_player_joined(Global.client.network_unique_id, create_mp_player())
+	
+	# add 2 bot
+	for i in 2:
+		_request_append_player_joined(_player_network_unique_id, create_bot_player())
+		
 	_server_advertise.setup()
 	_server_advertise.serverInfo["name"] = Global.player_data.name
 	_server_advertise.serverInfo["port"] = Global.server.port
@@ -185,7 +190,16 @@ func create_mp_player() -> Dictionary:
 		"status" : "Not Ready",
 		"flag" : PLAYER_STATUS_NOT_READY
 	}
-
+	
+func create_bot_player() -> Dictionary:
+	return {
+		"id" : "BOT-" + str(GDUUID.v4()),
+		"name" : RandomNameGenerator.generate() + " (Bot)",
+		"status" : "Ready",
+		"is_bot" : true,
+		"flag" : PLAYER_STATUS_READY
+	}
+	
 class MyCustomSorter:
 	static func sort(a, b):
 		if a["id"] < b["id"]:

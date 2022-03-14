@@ -9,9 +9,13 @@ signal on_click(_unit)
 signal on_dead(_unit)
 signal on_take_damage(_unit, _hit_by, _damage, _hp, _max_hp)
 signal on_pay_action(_unit, _cost, _ap, _max_ap)
+signal on_attack_performed(_unit)
 
 ############################################################
 # variables
+const NONE = 1
+const IDDLE = 1
+const MOVING = 2
 
 # tag
 var player = {}
@@ -27,10 +31,7 @@ var waypoint_grids = []
 
 # mobility
 var velocity = Vector3.ZERO
-var moving_state : Dictionary = {
-	is_attacking = false,
-	is_walking = false,
-}
+var moving_state : int = IDDLE
 var gravity = 75.0
 var speed = 2.0
 var turning_speed = 6.0
@@ -50,7 +51,9 @@ var hp : int = 10
 var max_hp :int = 10
 
 # misc
-var is_sync = false
+onready var latency = Network.LATENCY
+onready var latency_delay = Network.LATENCY_DELAY
+
 var _tween_movement : Tween = null
 var _network_timmer : Timer = null
 var _input_detection
@@ -61,19 +64,11 @@ func _network_timmer_timeout():
 	if is_dead:
 		return
 		
-	if not is_sync:
-		return
-		
-	sync_unit()
-	
-	
-func sync_unit():
 	if is_master():
 		rset_unreliable("_puppet_translation", translation)
 		rset_unreliable("_puppet_moving_state", moving_state)
 		rset_unreliable("_puppet_rotation", rotation)
-		rset_unreliable("_puppet_hp", hp)
-		rset_unreliable("_puppet_ap", ap)
+		rset_unreliable("_puppet_ap_hp", {"hp" : hp, "ap" : ap})
 	
 	
 puppet var _puppet_translation :Vector3 setget _set_puppet_translation
@@ -86,7 +81,7 @@ func _set_puppet_translation(_val :Vector3):
 	if is_master():
 		return
 		
-	_tween_movement.interpolate_property(self,"translation", translation, _puppet_translation, Network.LATENCY)
+	_tween_movement.interpolate_property(self,"translation", translation, _puppet_translation,latency)
 	_tween_movement.start()
 	
 	
@@ -95,33 +90,23 @@ func _set_puppet_rotation(_val:Vector3):
 	_puppet_rotation = _val
 	
 	
-puppet var _puppet_hp :float setget _set_puppet_hp
-func _set_puppet_hp(_val :float):
-	_puppet_hp = _val
+puppet var _puppet_ap_hp : Dictionary setget _set_puppet_ap_hp
+func _set_puppet_ap_hp(_val : Dictionary):
+	_puppet_ap_hp = _val
 	
 	if is_master():
 		return
+		
+	ap = _puppet_ap_hp["ap"]
+	hp = _puppet_ap_hp["hp"]
 	
-	hp = _puppet_hp
-	
-	
-puppet var _puppet_ap :float setget _set_puppet_ap
-func _set_puppet_ap(_val :float):
-	_puppet_ap = _val
-	
-	if is_master():
-		return
-	
-	ap = _puppet_ap
-	
-	
-puppetsync var _puppet_moving_state : Dictionary setget _set_puppet_moving_state
-func _set_puppet_moving_state(_val : Dictionary):
+puppetsync var _puppet_moving_state : int setget _set_puppet_moving_state
+func _set_puppet_moving_state(_val : int):
 	_puppet_moving_state = _val
 	
 	if is_master():
 		return
-	
+		
 	moving_state = _puppet_moving_state
 	
 	
@@ -135,24 +120,19 @@ remotesync func _occupied_grid(_waypoint_grid : NodePath):
 	current_grid.occupier = self
 	
 	
-remotesync func _pay_action(_cost, _master_ap : int):
-	if is_master():
-		return
+remotesync func _on_waypoint_reach():
+	emit_signal("on_waypoint_reach", self)
 	
-	ap = _master_ap
+remotesync func _pay_action(_cost, _master_ap : int):
 	emit_signal("on_pay_action", self, _cost, ap, max_ap)
 	
-	
-remotesync func _take_damage(_damage : float, _hit_by: NodePath):
+remotesync func _take_damage(_damage : int, _hit_by: NodePath):
 	hit_by = _hit_by
 	emit_signal("on_take_damage", self, hit_by, _damage, hp, max_hp)
-	
-	
 	
 remotesync func _perform_attack(_to: NodePath):
 	if is_dead:
 		return
-	
 	
 remotesync func _dead():
 	is_dead = true
@@ -181,7 +161,7 @@ func _ready():
 		
 	if not _network_timmer:
 		_network_timmer = Timer.new()
-		_network_timmer.wait_time = Network.LATENCY_DELAY
+		_network_timmer.wait_time = latency_delay
 		_network_timmer.connect("timeout", self , "_network_timmer_timeout")
 		_network_timmer.autostart = true
 		add_child(_network_timmer)
@@ -212,16 +192,16 @@ func master_moving(delta):
 	
 	if distance_to_target > offset_distance:
 		transform_turning(waypoint_grid.global_transform.origin, delta)
-		moving_state.is_walking = true
+		moving_state = MOVING
 		velocity = Vector3(direction.x, 0.0 , direction.z) * speed
 		
 	else:
-		moving_state.is_walking = false
+		moving_state = IDDLE
 		velocity = Vector3.ZERO
 		
 	velocity = move_and_slide(velocity, Vector3.UP)
 	
-	if not moving_state.is_walking:
+	if moving_state == IDDLE:
 		on_unit_waypoint_reach()
 		return
 	
@@ -264,12 +244,13 @@ func on_unit_waypoint_reach():
 		if i.name == waypoint_grid.name:
 			waypoint_grids.erase(i)
 			break
-		
+			
 	waypoint_grid = null
 	set_process(false)
 	
 	if waypoint_grids.empty():
-		emit_signal("on_waypoint_reach", self)
+		moving_state = NONE
+		rpc("_on_waypoint_reach")
 		return
 		
 	ap -= 1
@@ -284,7 +265,7 @@ func puppet_moving(_delta):
 		return
 	
 	
-func take_damage(_damage : float, _hit_by: NodePath):
+func take_damage(_damage : int, _hit_by: NodePath):
 	if not is_master():
 		return
 		
@@ -294,7 +275,7 @@ func take_damage(_damage : float, _hit_by: NodePath):
 	if is_dead:
 		return
 		
-	if hp < 1.0:
+	if hp < 1:
 		dead()
 		
 	rpc_unreliable("_take_damage", _damage, _hit_by)
@@ -317,20 +298,24 @@ func perform_attack(_to: NodePath):
 		
 	_target.take_damage(attack_damage, get_path())
 	
+	ap -= 1
 	rpc_unreliable("_perform_attack", _to)
 	
 ############################################################
 # input
 func _on_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.is_action_pressed("left_click"):
-		emit_signal("on_click", self)
+		on_click()
 		
 	_input_detection.check_input(event)
 	
 	
 func _on_any_gesture(sig ,event):
 	if event is InputEventSingleScreenTap:
-		emit_signal("on_click", self)
+		on_click()
+	
+func on_click():
+	emit_signal("on_click", self)
 	
 ############################################################
 # utils
@@ -363,14 +348,11 @@ func is_master() -> bool:
 	return true
 	
 	
-func is_targetable(_team) -> bool:
+func is_enemy(_team) -> bool:
 	return team != _team and not is_dead
 	
 ############################################################
 # testing & debug stuff
 func reset_unit():
 	ap = max_ap if ap == 0 else ap
-	sync_unit()
-	rpc("_pay_action", 0, ap)
-
 

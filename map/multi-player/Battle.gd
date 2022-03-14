@@ -9,6 +9,7 @@ const GAME_START = 1
 const GAME_INFO = 2
 const GAME_OVER = 3
 const GAME_FINISH = 4
+
 ################################################################
 # client and server variables
 var selected_unit : Unit
@@ -23,6 +24,7 @@ var players = []
 func _ready():
 	game_flag = GAME_LOADING
 	get_joined_players()
+	add_audio_player()
 #	get_tree().set_quit_on_go_back(false)
 #	get_tree().set_auto_accept_quit(false)
 
@@ -82,6 +84,10 @@ func get_joined_players():
 			"name" : player.name,
 			"flag_status" : PLAYER_STATUS_NOT_READY
 		}
+		if player.has("is_bot"):
+			data["is_bot"] = true
+			data["flag_status"] = PLAYER_STATUS_READY
+			
 		players.append(data)
 		
 func player_ready():
@@ -122,6 +128,7 @@ func is_all_player_ready() -> bool:
 	for i in players:
 		if i["flag_status"] == PLAYER_STATUS_NOT_READY:
 			return false
+		
 	return true
 	
 ################################################################
@@ -148,12 +155,13 @@ func generate_units(_terrain_path : NodePath, _quantity : int = 1) -> Array:
 			_unit_data["skin_texture"] = model["skin_texture"]
 			_unit_data["mesh_model"] = model["mesh_model"]
 			_unit_data["max_ap"] = int(rand_range(1, 3))
-			_unit_data["max_hp"] = int(rand_range(3, 5))
+			_unit_data["max_hp"] = int(rand_range(5, 10))
 			_unit_data["attack_damage"] = int(rand_range(2, 3))
 			#_unit_data["color"] = Color.white
 			_unit_data["team"] = player["id"]
 			_unit_data["translation"] = _grid.translation
 			_unit_data["grid"] = _grid.get_path()
+			_unit_data["player"] = player
 			units.append(_unit_data)
 			
 			_walkable_grids.erase(_grid)
@@ -177,13 +185,14 @@ func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	unit.color = (Color.green if _unit_data["team"] == Global.player_data.id else Color.red) #_unit_data["color"]
 	unit.team = _unit_data["team"]
 	unit.max_ap = _unit_data["max_ap"]
-	unit.ap = _unit_data["max_ap"]
+	unit.ap = unit.max_ap
 	unit.max_hp = _unit_data["max_hp"]
-	unit.hp = _unit_data["max_hp"]
+	unit.hp = unit.max_hp
 	unit.attack_damage = _unit_data["attack_damage"]
-	unit.is_sync = false
+	unit.player = _unit_data["player"]
 	
 	unit.connect("on_click", self ,"_on_unit_on_click")
+	unit.connect("on_attack_performed", self, "_on_unit_attack_performed")
 	unit.connect("on_dead", self ,"_on_unit_dead")
 	unit.connect("on_waypoint_reach", self, "_on_unit_waypoint_reach")
 	_unit_holder.add_child(unit)
@@ -193,13 +202,12 @@ func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	unit.current_grid = get_node(_unit_data["grid"])
 	unit.current_grid.occupier = unit
 	
+	
+func _on_unit_attack_performed(_unit):
+	_unit.reset_unit()
+	
 func _on_unit_waypoint_reach(_unit):
-	if is_server():
-		_unit.is_sync = false
-		_unit.sync_unit()
-		
-		# refil ap & hp for testing only
-		_unit.reset_unit()
+	_unit.reset_unit()
 	
 func _on_unit_dead(_unit : Unit):
 	_unit.current_grid.occupier = null
@@ -210,17 +218,23 @@ func _on_unit_dead(_unit : Unit):
 func move_unit(_unit : Unit, _terrain : Spatial, from, to : Vector2):
 	if is_server():
 		_move_unit(
-			selected_unit.get_path(),
+			_unit.get_path(),
 			_terrain.get_path(),
 			from, to
 		)
 		
 	else:
 		rpc_id(Network.PLAYER_HOST_ID,"_move_unit",
-			selected_unit.get_path(),
+			_unit.get_path(),
 			_terrain.get_path(),
 			from, to
 		)
+		
+func attack_unit(_from_unit, _to_unit : Unit):
+	if is_server():
+		_attack_unit(_from_unit.get_path(), _to_unit.get_path())
+	else:
+		rpc_id(Network.PLAYER_HOST_ID,"_attack_unit", _from_unit.get_path(), _to_unit.get_path())
 		
 remote func _move_unit(_unit_path : NodePath, _terrain_path : NodePath, from, to : Vector2):
 	var _unit = get_node_or_null(_unit_path )
@@ -233,32 +247,93 @@ remote func _move_unit(_unit_path : NodePath, _terrain_path : NodePath, from, to
 		
 	var waypoints = _terrain.get_list_grid_path(from, to)
 	_unit.set_waypoints(waypoints)
-	_unit.is_sync = true
+	
+	
+remote func _attack_unit(_from_unit_path, _to_unit_path : NodePath):
+	var _from_unit = get_node_or_null(_from_unit_path)
+	if not is_instance_valid(_from_unit):
+		return
+		
+	_from_unit.perform_attack(_to_unit_path)
 	
 ############################################################
 # unit and grid selection
-func clear_selected_unit(_terrain : Spatial) -> bool:
+func is_player_own_unit(_unit : Unit) -> bool:
+	return _unit.team == Global.player_data.id
+	
+func is_this_currently_selected_unit(_unit : Unit) -> bool:
+	return _unit == selected_unit
+	
+func is_selected_unit_valid() -> bool:
+	return is_instance_valid(selected_unit) and selected_unit.ap > 0
+	
+func is_grid_is_highlight(_unit : Unit) -> bool:
+	return _unit.current_grid.is_highlight()
+	
+func clear_highlight(_terrain : Spatial):
 	if is_instance_valid(selected_unit):
 		for i in _terrain.get_grids():
 			i.highlight(false)
 			
-		selected_unit = null
-		return true
-	return false
+func toggle_highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
+	var grids_in_range = []
+	var enemy_in_range = []
 	
-func highlight_near_adjacent_from(_unit : Unit):
-	if _unit.team != Global.player_data.id:
+	if _unit.ap == 0:
 		return
 		
-	selected_unit = _unit
-	for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.ap, false):
+		# check if any enemy near attack range
+	for i in _unit.current_grid.get_adjacent_neighbors(_unit.attack_range, false):
 		if i.is_walkable:
 			if is_instance_valid(i.occupier):
-				if i.occupier.is_targetable(selected_unit.team):
-					i.highlight(true, Color.red)
-				continue
+				if i.occupier.is_enemy(_unit.team):
+					enemy_in_range.append(i)
+					continue
+			else:
+				grids_in_range.append(i)
 				
-			i.highlight(true, Color.white)
+	if enemy_in_range.size() > 0:
+		for i in grids_in_range:
+			i.highlight(not i.is_highlight(), Color.white)
+			
+		for i in enemy_in_range:
+			i.highlight(not i.is_highlight(), Color.red)
+			
+		return
+		
+	# no enemy, change travel mode
+	for i in _unit.current_grid.get_adjacent_neighbors(_unit.ap, true):
+		if i.is_walkable and not is_instance_valid(i.occupier):
+			i.highlight(not i.is_highlight(), Color.white)
+	
+	
+############################################################
+# sound
+var audio_sfx : AudioStreamPlayer
+
+func add_audio_player():
+	audio_sfx = AudioStreamPlayer.new()
+	audio_sfx.bus = "sfx"
+	add_child(audio_sfx)
+	
+func play_audio_unit_selected():
+	audio_sfx.stream = preload("res://assets/sound/selection_click.wav")
+	audio_sfx.play()
+	
+func play_audio_unit_attacking():
+	audio_sfx.stream = preload("res://assets/sound/bubble_cling.wav")
+	audio_sfx.play()
+	
+func play_audio_unit_move():
+	audio_sfx.stream = preload("res://assets/sound/move_click.wav")
+	audio_sfx.play()
+	
+func play_audio_invalid_click():
+	audio_sfx.stream = preload("res://assets/sound/wrong_click.wav")
+	audio_sfx.play()
+
+
+
 
 
 

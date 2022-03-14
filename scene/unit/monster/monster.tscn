@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://scene/unit/models/Mushroom.obj" type="ArrayMesh" id=1]
 [ext_resource path="res://scene/unit/monster/monster.gd" type="Script" id=2]
@@ -29,7 +29,49 @@ tracks/1/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ Vector3( 45.497, 0, 0 ) ]
+"values": [ Vector3( 0, 0, 0 ) ]
+}
+
+[sub_resource type="Animation" id=17]
+resource_name = "attack"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath("pivot:translation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4, 0.6, 0.8 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0.1, 0 ), Vector3( 0, 0.6, -0.400486 ), Vector3( 0, 0.1, -0.4 ), Vector3( 0, 0.1, -0.2 ), Vector3( 0, 0.1, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("pivot:rotation_degrees")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( 26.656, 0, 0 ), Vector3( -60.534, 0, 0 ), Vector3( 0, 0, 0 ) ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0.7 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "_on_attack_performed"
+} ]
 }
 
 [sub_resource type="Animation" id=13]
@@ -130,6 +172,9 @@ tracks/1/keys = {
 "values": [ Vector3( 0, 0, 0 ) ]
 }
 
+[sub_resource type="AnimationNodeAnimation" id=18]
+animation = "attack"
+
 [sub_resource type="AnimationNodeAnimation" id=14]
 animation = "die"
 
@@ -147,14 +192,22 @@ switch_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id=15]
 
+[sub_resource type="AnimationNodeStateMachineTransition" id=19]
+
+[sub_resource type="AnimationNodeStateMachineTransition" id=20]
+switch_mode = 2
+auto_advance = true
+
 [sub_resource type="AnimationNodeStateMachine" id=6]
+states/attack/node = SubResource( 18 )
+states/attack/position = Vector2( 335, 146 )
 states/die/node = SubResource( 14 )
-states/die/position = Vector2( 225, 134 )
+states/die/position = Vector2( 525, 43 )
 states/iddle/node = SubResource( 8 )
-states/iddle/position = Vector2( 102, 45 )
+states/iddle/position = Vector2( 335, 43 )
 states/walking/node = SubResource( 9 )
-states/walking/position = Vector2( 365, 45 )
-transitions = [ "iddle", "walking", SubResource( 10 ), "walking", "iddle", SubResource( 11 ), "iddle", "die", SubResource( 15 ) ]
+states/walking/position = Vector2( 97, 43 )
+transitions = [ "iddle", "walking", SubResource( 10 ), "walking", "iddle", SubResource( 11 ), "iddle", "die", SubResource( 15 ), "iddle", "attack", SubResource( 19 ), "attack", "iddle", SubResource( 20 ) ]
 start_node = "iddle"
 
 [sub_resource type="AnimationNodeStateMachinePlayback" id=7]
@@ -167,7 +220,7 @@ height = 0.254253
 script = ExtResource( 2 )
 
 [node name="pivot" type="Spatial" parent="."]
-transform = Transform( 0.3, 0, 0, 0, 0.210284, -0.213964, 0, 0.213964, 0.210284, 0, 0.1, 0 )
+transform = Transform( 0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0.1, 0 )
 
 [node name="MeshInstance" type="MeshInstance" parent="pivot"]
 transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0 )
@@ -178,6 +231,7 @@ material/0 = null
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 anims/RESET = SubResource( 3 )
+anims/attack = SubResource( 17 )
 anims/die = SubResource( 13 )
 anims/iddle = SubResource( 4 )
 anims/walking = SubResource( 5 )
@@ -199,3 +253,8 @@ transform = Transform( 0.114856, 0, 0, 0, 0.220672, 0, 0, 0, 1, 0, 0.914863, 0 )
 transform = Transform( 0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 1.11208, 0 )
 
 [node name="Tween" type="Tween" parent="."]
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+unit_db = 10.0
+unit_size = 10.0
+bus = "sfx"

@@ -31,7 +31,6 @@ func _on_terrain_on_spawning_grid(task_done, max_task : int):
 	_ui.display_loading_progress("Generating Map...", task_done, max_task)
 	
 func _on_terrain_on_grid_click(_node : StaticBody):
-	_node.pop_grid()
 	if is_instance_valid(selected_unit) and _node.is_highlight():
 		if _node.is_walkable:
 			.move_unit(
@@ -40,18 +39,39 @@ func _on_terrain_on_grid_click(_node : StaticBody):
 				selected_unit.current_grid.axial_coordinate,
 				_node.axial_coordinate
 			)
-		
-	if .clear_selected_unit(_terrain):
-		return
+			.play_audio_unit_move()
+			
+	.clear_highlight(_terrain)
 	
 ############################################################
 # unit
 func _on_unit_on_click(_unit : Unit):
-	if .clear_selected_unit(_terrain):
-		return
+	if .is_player_own_unit(_unit):
+		# selection/movement mode
+		if .is_this_currently_selected_unit(_unit):
+			.toggle_highlight_adjacent_grid(_terrain, _unit)
+			
+		else:
+			selected_unit = _unit
+			.clear_highlight(_terrain)
+			.toggle_highlight_adjacent_grid(_terrain, selected_unit)
+			
+		play_audio_unit_selected()
 		
-	.highlight_near_adjacent_from(_unit)
-		
+	else:
+		# attack mode
+		if .is_selected_unit_valid() and .is_grid_is_highlight(_unit):
+			.attack_unit(selected_unit, _unit)
+			.clear_highlight(_terrain)
+			play_audio_unit_attacking()
+		else:
+			play_audio_invalid_click()
+			
+func _on_unit_waypoint_reach(_unit):
+	._on_unit_waypoint_reach(_unit)
+	if .is_this_currently_selected_unit(_unit):
+		.toggle_highlight_adjacent_grid(_terrain, _unit)
+	
 ############################################################
 # player
 func players_updated():

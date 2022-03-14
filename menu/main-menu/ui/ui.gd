@@ -2,6 +2,9 @@ extends Control
 
 onready var _server_browser = $CanvasLayer/server_browser
 
+func _ready():
+	_server_browser.start_finding()
+
 func _on_host_pressed():
 	Global.mode = Global.MODE_HOST
 	get_tree().change_scene("res://menu/lobby-menu/lobby_menu.tscn")

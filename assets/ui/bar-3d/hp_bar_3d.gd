@@ -10,7 +10,7 @@ func _ready():
 func show_label(_show = true):
 	_2d_hp_bar.show_label(_show)
 	
-func update_bar(hp, max_hp):
+func update_bar(hp, max_hp : int):
 	_2d_hp_bar.update_bar(hp, max_hp)
 	
 func set_hp_bar_color(_color : Color):
