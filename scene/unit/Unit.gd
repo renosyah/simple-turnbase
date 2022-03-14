@@ -36,7 +36,7 @@ var attack_damage : int = 1
 var attack_range : int = 1
 
 # action point
-var ap : int = 2
+var ap : int = 2 setget _set_ap
 var max_ap : int = 2
 
 # vitality
@@ -59,11 +59,15 @@ func _network_timmer_timeout():
 	if not is_sync:
 		return
 		
+	sync_unit()
+	
+func sync_unit():
 	if is_master():
 		rset_unreliable("_puppet_translation", translation)
 		rset_unreliable("_puppet_moving_state", moving_state)
 		rset_unreliable("_puppet_rotation", rotation)
 		rset_unreliable("_puppet_hp", hp)
+		rset_unreliable("_puppet_ap", ap)
 		
 puppet var _puppet_translation :Vector3 setget _set_puppet_translation
 func _set_puppet_translation(_val :Vector3):
@@ -75,7 +79,7 @@ func _set_puppet_translation(_val :Vector3):
 	if is_master():
 		return
 		
-	_tween_movement.interpolate_property(self,"translation", translation, _puppet_translation, 0.5)
+	_tween_movement.interpolate_property(self,"translation", translation, _puppet_translation, Network.LATENCY)
 	_tween_movement.start()
 	
 puppet var _puppet_rotation: Vector3 setget _set_puppet_rotation
@@ -91,6 +95,15 @@ func _set_puppet_hp(_val :float):
 	
 	hp = _puppet_hp
 	
+puppet var _puppet_ap :float setget _set_puppet_ap
+func _set_puppet_ap(_val :float):
+	_puppet_ap = _val
+	
+	if is_master():
+		return
+	
+	_set_ap(_puppet_ap)
+	
 puppetsync var _puppet_moving_state : Dictionary setget _set_puppet_moving_state
 func _set_puppet_moving_state(_val : Dictionary):
 	_puppet_moving_state = _val
@@ -100,9 +113,20 @@ func _set_puppet_moving_state(_val : Dictionary):
 	
 	moving_state = _puppet_moving_state
 	
+remotesync func _occupied_grid(_waypoint_grid : NodePath):
+	var _waypoint_grid_node = get_node_or_null(_waypoint_grid)
+	if not is_instance_valid(_waypoint_grid_node):
+		return
+		
+	current_grid.occupier = null
+	current_grid = _waypoint_grid_node
+	current_grid.occupier = self
+	
+	
 remotesync func _take_damage(_damage : float, _hit_by: NodePath):
 	hit_by = _hit_by
 	emit_signal("on_take_damage", self, hit_by, _damage, hp, max_hp)
+	
 	
 remotesync func _perform_attack(_to: NodePath):
 	if is_dead:
@@ -133,7 +157,7 @@ func _ready():
 		
 	if not _network_timmer:
 		_network_timmer = Timer.new()
-		_network_timmer.wait_time = 0.4
+		_network_timmer.wait_time = Network.LATENCY_DELAY
 		_network_timmer.connect("timeout", self , "_network_timmer_timeout")
 		_network_timmer.autostart = true
 		add_child(_network_timmer)
@@ -182,18 +206,29 @@ func moving(_delta):
 func is_moving():
 	return not waypoint_grids.empty()
 	
+func _set_ap(_val :int):
+	ap = _val
+	
 func set_waypoints(_waypoint_grids : Array):
 	if not waypoint_grids.empty():
 		return
 		
-	waypoint_grids = _waypoint_grids.duplicate()
+	if _waypoint_grids.empty():
+		return
+		
+	for i in ap:
+		if _waypoint_grids.size() > i:
+			waypoint_grids.append(_waypoint_grids[i])
+			
+	if waypoint_grids.empty():
+		return
+		
+	_set_ap(ap - 1)
 	waypoint_grid = waypoint_grids[0]
 	set_process(true)
 	
 func on_unit_waypoint_reach():
-	current_grid.occupier = null
-	current_grid = waypoint_grid
-	current_grid.occupier = self
+	rpc("_occupied_grid", waypoint_grid.get_path())
 	
 	for i in waypoint_grids:
 		if i.name == waypoint_grid.name:
@@ -207,9 +242,10 @@ func on_unit_waypoint_reach():
 		emit_signal("on_waypoint_reach", self)
 		return
 		
+	_set_ap(ap - 1)
 	waypoint_grid = waypoint_grids[0]
 	set_process(true)
-	
+
 func puppet_moving(_delta):
 	if is_dead:
 		return

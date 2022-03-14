@@ -6,6 +6,9 @@ const FLOAT_EPSILON = 0.00001
 static func compare_floats(a, b, epsilon = FLOAT_EPSILON) -> bool:
 	return abs(a - b) <= epsilon
 	
+static func create_grid_name(_axial_coordinate : Vector2) -> String:
+	return "GRID-"+ str(_axial_coordinate.x) +"-"+ str(_axial_coordinate.y)
+	
 	
 enum {
 	FORMAT_HOURS   = 1 << 0,

@@ -1,7 +1,8 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://scene/unit/models/Mushroom.obj" type="ArrayMesh" id=1]
 [ext_resource path="res://scene/unit/monster/monster.gd" type="Script" id=2]
+[ext_resource path="res://assets/ui/message-3d/message_3d.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/ui/bar-3d/hp_bar_3d.tscn" type="PackedScene" id=4]
 
 [sub_resource type="Animation" id=3]
@@ -193,5 +194,8 @@ shape = SubResource( 16 )
 
 [node name="hpBar" parent="." instance=ExtResource( 4 )]
 transform = Transform( 0.114856, 0, 0, 0, 0.220672, 0, 0, 0, 1, 0, 0.914863, 0 )
+
+[node name="message_3d" parent="." instance=ExtResource( 3 )]
+transform = Transform( 0.6, 0, 0, 0, 0.6, 0, 0, 0, 0.6, 0, 1.11208, 0 )
 
 [node name="Tween" type="Tween" parent="."]

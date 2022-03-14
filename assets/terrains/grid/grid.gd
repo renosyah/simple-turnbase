@@ -20,7 +20,7 @@ var axial_coordinate : Vector2 = Vector2.ZERO
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_process(false)
-	name = create_name(axial_coordinate)
+	name = Utils.create_grid_name(axial_coordinate)
 	_base.mesh = load(mesh_base)
 	
 	if mesh_top == "":
@@ -35,7 +35,7 @@ func _ready():
 func get_adjacent_neighbors(_range : int = 1, _only_travel : bool = true) -> Array:
 	var adjacent_neighbors = []
 	for i in preload("res://addons/Hex/HexCell.gd").new(axial_coordinate).get_all_within(_range):
-		var _path = NodePath(str(get_parent().get_path()) + "/" + create_name(i.axial_coords))
+		var _path = NodePath(str(get_parent().get_path()) + "/" + Utils.create_grid_name(i.axial_coords))
 		var _node = get_node_or_null(_path)
 		if not is_instance_valid(_node):
 			continue
@@ -49,11 +49,6 @@ func get_adjacent_neighbors(_range : int = 1, _only_travel : bool = true) -> Arr
 		
 	return adjacent_neighbors
 	
-	
-func create_name(_axial_coordinate : Vector2) -> String:
-	return "GRID-"+ str(_axial_coordinate.x) +"-"+ str(_axial_coordinate.y)
-	
-	
 func _on_grid_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.is_action_pressed("left_click"):
 		emit_signal("on_click", self)
@@ -65,7 +60,6 @@ func _on_input_detection_any_gesture(sig ,event):
 	if event is InputEventSingleScreenTap:
 		emit_signal("on_click", self)
 	
-	
 func highlight(show : bool, color : Color = Color.white):
 	var material : Material = _highlight.mesh.surface_get_material(0).duplicate()
 	material.albedo_color = color
@@ -76,3 +70,29 @@ func highlight(show : bool, color : Color = Color.white):
 func is_highlight() -> bool:
 	return _highlight.visible
 	
+	
+func pop_grid():
+	_tween.interpolate_property(self,"scale", Vector3.ONE * 0.9, Vector3.ONE, 0.6)
+	_tween.interpolate_property(self,"translation:y", -0.2, 0.0, 0.3)
+	_tween.start()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

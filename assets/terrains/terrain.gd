@@ -81,20 +81,30 @@ func generate():
 			tile_coordinates.y = (i["vector"]["y"] - size) * TILE_SIZE * cos(deg2rad(30))
 			
 			var axial_coordinate = HexGrid.get_hex_at(tile_coordinates).axial_coords
+			axial_coordinate.y = int(axial_coordinate.y) + 0.0
+			axial_coordinate.x = int(axial_coordinate.x) + 0.0
+			
 			var base_key = _get_base_grid_key(simplex.get_noise_2d(tile_coordinates.x, tile_coordinates.y))
 			var top_key = _get_grid_top_key(base_key)
-			
-			print(axial_coordinate)
-			
-			generated_grid.append({
+			var grid = {
 				"is_walkable" : _check_is_walkable(base_key, top_key),
 				"mesh_top" : GRIDS_TOP[top_key],
 				"mesh_base" : GRIDS_BASE[base_key],
 				"translation" : HexGrid.get_hex_center3(axial_coordinate),
 				"axial_coordinate" : axial_coordinate,
-			})
+			}
 			
+			if not is_in_array(grid,generated_grid):
+				generated_grid.append(grid)
+		
 	emit_signal("on_finish_generate", generated_grid)
+	
+func is_in_array(obj : Dictionary, arr : Array) -> bool:
+	for i in arr:
+		if i["axial_coordinate"] == obj["axial_coordinate"]:
+			return true
+			
+	return false
 	
 func spawn_grid():
 	clear_terrain()
@@ -149,7 +159,6 @@ func _on_click(_node):
 	
 	
 	
-# path finding still broken :(
 func get_list_grid_path(from, to : Vector2) -> Array:
 	var exceptions = []
 	for i in _holder.get_children():
@@ -164,8 +173,7 @@ func get_list_grid_path(from, to : Vector2) -> Array:
 		if ac == from:
 			continue
 			
-		var _grid_name = "GRID-"+ str(ac.x) +"-"+ str(ac.y)
-		var _node = get_node_or_null(str(_holder.get_path()) + "/" + _grid_name)
+		var _node = get_node_or_null(str(_holder.get_path()) + "/" + Utils.create_grid_name(ac))
 		if is_instance_valid(_node):
 			path.append(_node)
 			
@@ -175,6 +183,8 @@ func get_list_grid_path(from, to : Vector2) -> Array:
 	
 	
 # cost still broken :(
+# get cost just count lengt of path
+# from get_list_grid_path
 func get_movement_cost(from, to : Vector2):
 	return HexGrid.get_move_cost(from, to)
 	

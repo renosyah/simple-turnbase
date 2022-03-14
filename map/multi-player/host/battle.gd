@@ -25,24 +25,38 @@ func generate_terrain():
 	_terrain.map_seed = randi()
 	_terrain.density = rand_range(0.25, 0.55)
 	_terrain.generate()
-
-func _on_terrain_on_finish_generate(_generated_grid):
+	
+func _on_terrain_on_finish_generate(_generated_grid : Array):
 	_terrain.spawn_grid()
 	host_ready(_generated_grid)
 	
 func _on_terrain_on_terrain_ready():
 	.player_ready()
 	
-func _on_terrain_on_grid_click(_node):
-	pass
-	
-func _on_terrain_on_spawning_grid(task_done, max_task):
+func _on_terrain_on_spawning_grid(task_done, max_task : int):
 	_ui.display_loading_progress("Generating Map...", task_done, max_task)
+	
+func _on_terrain_on_grid_click(_node : StaticBody):
+	_node.pop_grid()
+	if is_instance_valid(selected_unit) and _node.is_highlight():
+		if _node.is_walkable:
+			.move_unit(
+				selected_unit,
+				_terrain,
+				selected_unit.current_grid.axial_coordinate,
+				_node.axial_coordinate
+			)
+		
+	if .clear_selected_unit():
+		return
 	
 ############################################################
 # unit
 func _on_unit_on_click(_unit : Unit):
-	pass
+	if .clear_selected_unit():
+		return
+		
+	.highlight_near_adjacent_from(_unit)
 	
 ############################################################
 # player
@@ -55,7 +69,7 @@ func players_updated():
 	_ui.display_loading(false)
 	game_flag = GAME_START
 	
-	rpc("_spawn_units", _unit_holder.get_path(), .generate_units(_terrain.get_path()))
+	rpc("_spawn_units", _unit_holder.get_path(), .generate_units(_terrain.get_path(), 4))
 	
 ############################################################
 # bot

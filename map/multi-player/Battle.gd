@@ -9,6 +9,9 @@ const GAME_START = 1
 const GAME_INFO = 2
 const GAME_OVER = 3
 const GAME_FINISH = 4
+################################################################
+# client and server variables
+var selected_unit : Unit
 
 ################################################################
 # server variables
@@ -123,15 +126,7 @@ func is_all_player_ready() -> bool:
 	
 ################################################################
  # unit
-remotesync func _spawn_units(_unit_holder_path : NodePath, _units : Array):
-	var _unit_holder = get_node_or_null(_unit_holder_path)
-	if not is_instance_valid(_unit_holder):
-		return
-		
-	for  data in _units:
-		spawn_unit(_unit_holder, data)
-		
-func generate_units(_terrain_path : NodePath) -> Array:
+func generate_units(_terrain_path : NodePath, _quantity : int = 1) -> Array:
 	var units = []
 		
 	var _terrain_node = get_node_or_null(_terrain_path)
@@ -142,34 +137,43 @@ func generate_units(_terrain_path : NodePath) -> Array:
 	for i in _terrain_node.get_grids():
 		if i.is_walkable:
 			_walkable_grids.append(i)
-		
-	for i in 8:
-		var model = Monsters.MODELS[randi() % Monsters.MODELS.size()]
-		var _grid = _walkable_grids[randi() %  _walkable_grids.size()]
-		var _unit_data = {}
-		_unit_data["name"] = "Unit-" + str(i)
-		_unit_data["network_master"] = Network.PLAYER_HOST_ID
-		_unit_data["skin_texture"] = model["skin_texture"]
-		_unit_data["mesh_model"] = model["mesh_model"]
-		_unit_data["color"] = Color.red
-		_unit_data["team"] = "monster"
-		_unit_data["translation"] = _grid.translation
-		_unit_data["grid"] = _grid.get_path()
-		units.append(_unit_data)
-		
-		_walkable_grids.erase(_grid)
+			
+	for player in players:
+		for i in _quantity:
+			var model = Monsters.MODELS[randi() % Monsters.MODELS.size()]
+			var _grid = _walkable_grids[randi() %  _walkable_grids.size()]
+			var _unit_data = {}
+			_unit_data["name"] = "Unit-" + str(i) + "-" + player["id"]
+			_unit_data["network_master"] = Network.PLAYER_HOST_ID
+			_unit_data["skin_texture"] = model["skin_texture"]
+			_unit_data["mesh_model"] = model["mesh_model"]
+			#_unit_data["color"] = Color.white
+			_unit_data["team"] = player["id"]
+			_unit_data["translation"] = _grid.translation
+			_unit_data["grid"] = _grid.get_path()
+			units.append(_unit_data)
+			
+			_walkable_grids.erase(_grid)
 		
 	return units
 	
+remotesync func _spawn_units(_unit_holder_path : NodePath, _units : Array):
+	var _unit_holder = get_node_or_null(_unit_holder_path)
+	if not is_instance_valid(_unit_holder):
+		return
+		
+	for  data in _units:
+		spawn_unit(_unit_holder, data)
+		
 func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	var unit = preload("res://scene/unit/monster/monster.tscn").instance()
 	unit.name = _unit_data["name"]
 	unit.set_network_master(_unit_data["network_master"])
 	unit.skin_texture = _unit_data["skin_texture"]
 	unit.mesh_model = _unit_data["mesh_model"]
-	unit.color = _unit_data["color"]
+	unit.color = (Color.green if _unit_data["team"] == Global.player_data.id else Color.red) #_unit_data["color"]
 	unit.team = _unit_data["team"]
-	unit.is_sync = true
+	unit.is_sync = false
 	
 	unit.connect("on_click", self ,"_on_unit_on_click")
 	unit.connect("on_dead", self ,"_on_unit_dead")
@@ -182,13 +186,65 @@ func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	unit.current_grid.occupier = unit
 	
 func _on_unit_waypoint_reach(_unit):
-	pass
+	if is_server():
+		# refil ap for testing only
+		_unit.ap = _unit.ap if _unit.ap > 0 else _unit.max_ap
+		
+		_unit.is_sync = false
+		_unit.sync_unit()
 	
 func _on_unit_dead(_unit : Unit):
 	_unit.current_grid.occupier = null
 	_unit.queue_free()
 	
-
+################################################################
+ # unit movement
+func move_unit(_unit : Unit, _terrain : Spatial, from, to : Vector2):
+	if is_server():
+		_move_unit(
+			selected_unit.get_path(),
+			_terrain.get_path(),
+			from, to
+		)
+		
+	else:
+		rpc_id(Network.PLAYER_HOST_ID,"_move_unit",
+			selected_unit.get_path(),
+			_terrain.get_path(),
+			from, to
+		)
+		
+remote func _move_unit(_unit_path : NodePath, _terrain_path : NodePath, from, to : Vector2):
+	var _unit = get_node_or_null(_unit_path )
+	if not is_instance_valid(_unit):
+		return
+		
+	var _terrain = get_node_or_null(_terrain_path)
+	if not is_instance_valid(_terrain):
+		return
+		
+	var waypoints = _terrain.get_list_grid_path(from, to)
+	_unit.set_waypoints(waypoints)
+	_unit.is_sync = true
+	
+############################################################
+# unit and grid selection
+func clear_selected_unit() -> bool:
+	if is_instance_valid(selected_unit):
+		for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.travel_distance):
+			i.highlight(false)
+			
+		selected_unit = null
+		return true
+	return false
+	
+func highlight_near_adjacent_from(_unit : Unit):
+	if _unit.team != Global.player_data.id:
+		return
+		
+	selected_unit = _unit
+	for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.travel_distance):
+		i.highlight(true, Color.white if i.is_walkable else Color.red)
 
 
 

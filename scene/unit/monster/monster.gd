@@ -3,6 +3,7 @@ extends Unit
 onready var _mesh = $pivot/MeshInstance
 onready var _tween = $Tween
 onready var _hp_bar = $hpBar
+onready var _ap_bar = $message_3d
 onready var _state = $AnimationTree.get("parameters/playback")
 
 var skin_texture
@@ -45,12 +46,11 @@ remotesync func _dead():
 ############################################################
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	color = Color.red
-	team = "monster"
-	
 	_hp_bar.update_bar(hp, max_hp)
 	_hp_bar.set_hp_bar_color(color)
 	_hp_bar.show_label(false)
+	
+	_ap_bar.set_message(str(ap) + "/" + str(max_ap))
 	
 	_mesh.mesh = load(mesh_model)
 	var material = preload("res://scene/unit/material/monster.tres").duplicate()
@@ -66,6 +66,10 @@ func puppet_moving(_delta):
 	
 func _on_finish_dead():
 	emit_signal("on_dead", self)
+	
+func _set_ap(_val : int):
+	._set_ap(_val)
+	_ap_bar.set_message(str(ap) + "/" + str(max_ap))
 	
 	
 	

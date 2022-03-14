@@ -22,7 +22,6 @@ wait_time = 0.8
 one_shot = true
 
 [node name="bot" type="Timer" parent="."]
-autostart = true
 
 [node name="terrain" parent="." instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0 )
