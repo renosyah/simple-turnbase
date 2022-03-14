@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://assets/button/bg.png" type="Texture" id=1]
-[ext_resource path="res://menu/lobby-menu/ui.gd" type="Script" id=2]
+[ext_resource path="res://menu/lobby-menu/ui/ui.gd" type="Script" id=2]
 [ext_resource path="res://addons/LANServerBroadcast/server_advertiser/ServerAdvertiser.gd" type="Script" id=3]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_48.tres" type="DynamicFont" id=4]
 [ext_resource path="res://assets/button/bg_press.png" type="Texture" id=5]
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=6]
+[ext_resource path="res://assets/ui/server-browser/back.png" type="Texture" id=7]
 
 [node name="ui" type="Control"]
 anchor_right = 1.0
@@ -24,16 +26,97 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/control"]
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_bottom = -283.0
+color = Color( 0, 0, 0, 0.65098 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_bottom = -279.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer/control/VBoxContainer"]
+margin_right = 600.0
+margin_bottom = 120.0
+rect_min_size = Vector2( 0, 120 )
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/control/VBoxContainer/PanelContainer"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 593.0
+margin_bottom = 113.0
+
+[node name="back" type="Button" parent="CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_right = 100.0
+margin_bottom = 106.0
+rect_min_size = Vector2( 100, 100 )
+custom_fonts/font = ExtResource( 6 )
+flat = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect2" type="TextureRect" parent="CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer/back"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -40.0
+margin_top = -40.0
+margin_right = 40.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 80, 80 )
+texture = ExtResource( 7 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="margin" type="CenterContainer" parent="CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 104.0
+margin_right = 482.0
+margin_bottom = 106.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer/margin"]
+margin_left = 110.0
+margin_top = 23.0
+margin_right = 267.0
+margin_bottom = 83.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 4 )
+text = "Lobby"
+align = 1
+valign = 1
+
+[node name="refresh" type="MarginContainer" parent="CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 486.0
+margin_right = 586.0
+margin_bottom = 106.0
+rect_min_size = Vector2( 100, 100 )
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/control/VBoxContainer"]
+margin_top = 124.0
+margin_right = 600.0
+margin_bottom = 745.0
+size_flags_vertical = 3
 scroll_horizontal_enabled = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/control/ScrollContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/control/VBoxContainer/ScrollContainer"]
 margin_right = 600.0
 size_flags_horizontal = 3
 
@@ -111,5 +194,6 @@ __meta__ = {
 [node name="server_advertise" type="Node" parent="."]
 script = ExtResource( 3 )
 
+[connection signal="pressed" from="CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer/back" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CanvasLayer/control/HBoxContainer/play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="CanvasLayer/control/HBoxContainer/ready" to="." method="_on_ready_pressed"]

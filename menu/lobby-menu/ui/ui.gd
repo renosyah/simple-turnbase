@@ -8,7 +8,8 @@ const PLAYER_STATUS_READY = "READY"
 
 onready var _server_advertise = $server_advertise
 
-onready var _player_holder = $CanvasLayer/control/ScrollContainer/VBoxContainer
+onready var _player_holder = $CanvasLayer/control/VBoxContainer/ScrollContainer/VBoxContainer
+
 onready var _play_button = $CanvasLayer/control/HBoxContainer/play
 onready var _ready_button = $CanvasLayer/control/HBoxContainer/ready
 
@@ -109,11 +110,11 @@ func _on_host_game_session_ready(_mp_game_data : Dictionary):
 	
 func _server_disconnected():
 	Global.mp_exception_message = "Unexpected exit by Server!"
-	get_tree().change_scene("res://menu/main-menu/ui.tscn")
+	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
 	
 func _got_kickout():
 	Global.mp_exception_message = "You have been kickout by host!"
-	get_tree().change_scene("res://menu/main-menu/ui.tscn")
+	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
 
 ################################################################
 # ui action
@@ -142,7 +143,7 @@ func fill_player_slot():
 	_play_button.self_modulate = BUTTON_BATTLE_DISABLE_COLOR if (not is_all_ready) else BUTTON_BATTLE_ENABLE_COLOR
 	
 	for i in player_joined:
-		var item = preload("res://menu/lobby-menu/item/item.tscn").instance()
+		var item = preload("res://menu/lobby-menu/ui/item/item.tscn").instance()
 		item.data = i
 		item.can_kick = (i.id != Global.player_data.id and is_server())
 		item.connect("kick", self, "_on_player_get_kick")
@@ -171,6 +172,10 @@ func _on_player_get_kick(_player):
 		
 	rpc("_kick_player", _player)
 	
+func _on_back_pressed():
+	Network.disconnect_from_server()
+	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
+	
 ################################################################
 # utils
 func create_mp_player() -> Dictionary:
@@ -189,6 +194,9 @@ class MyCustomSorter:
 		
 func is_server():
 	return Global.mode == Global.MODE_HOST
+
+
+
 
 
 

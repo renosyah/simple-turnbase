@@ -111,7 +111,7 @@ _global_script_class_icons={
 [application]
 
 config/name="simple-turnbase"
-run/main_scene="res://menu/main-menu/ui.tscn"
+run/main_scene="res://menu/main-menu/main_menu.tscn"
 config/icon="res://icon.png"
 
 [autoload]

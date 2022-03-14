@@ -1,0 +1,31 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://assets/terrains/terrain.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/gameplay-camera/gameplay_camera.tscn" type="PackedScene" id=2]
+[ext_resource path="res://menu/main-menu/ui/ui.tscn" type="PackedScene" id=3]
+[ext_resource path="res://menu/main-menu/main_menu.gd" type="Script" id=7]
+
+[sub_resource type="ProceduralSky" id=1]
+
+[sub_resource type="Environment" id=2]
+background_mode = 3
+background_sky = SubResource( 1 )
+background_color = Color( 0.254902, 0.823529, 1, 1 )
+
+[node name="main_menu" type="Node"]
+script = ExtResource( 7 )
+
+[node name="terrain" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 1.92058 )
+
+[node name="cameraPivot" parent="." instance=ExtResource( 2 )]
+is_enable = false
+
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 40, 10 )
+light_energy = 1.6
+
+[node name="main_menu" parent="." instance=ExtResource( 3 )]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 2 )

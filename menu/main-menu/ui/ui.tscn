@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://assets/ui/server-browser/server_browser.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=2]
-[ext_resource path="res://menu/main-menu/ui.gd" type="Script" id=3]
+[ext_resource path="res://menu/main-menu/ui/ui.gd" type="Script" id=3]
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_48.tres" type="DynamicFont" id=4]
 
 [node name="main_menu" type="Control"]
 anchor_right = 1.0
@@ -22,12 +23,30 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Label" type="Label" parent="CanvasLayer/control"]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_top = -212.0
+margin_bottom = -198.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 4 )
+text = "Simple
+Turn-base"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/control"]
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_top = -50.0
-margin_bottom = 50.0
+margin_top = 288.0
+margin_bottom = 388.0
 alignment = 1
 __meta__ = {
 "_edit_use_anchors_": false
