@@ -20,7 +20,11 @@ func _set_puppet_moving_state(_val : Dictionary):
 		_state.travel("walking")
 	else:
 		_state.travel("iddle")
-		
+	
+remotesync func _pay_action(_cost, _master_ap : int):
+	._pay_action(_cost, _master_ap)
+	_ap_bar.set_message(str(ap) + "/" + str(max_ap))
+	
 remotesync func _take_damage(_damage : float, _hit_by: NodePath):
 	._take_damage(_damage, _hit_by)
 	_hp_bar.update_bar(hp, max_hp)
@@ -66,10 +70,5 @@ func puppet_moving(_delta):
 	
 func _on_finish_dead():
 	emit_signal("on_dead", self)
-	
-func _set_ap(_val : int):
-	._set_ap(_val)
-	_ap_bar.set_message(str(ap) + "/" + str(max_ap))
-	
 	
 	

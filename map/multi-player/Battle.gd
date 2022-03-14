@@ -147,6 +147,9 @@ func generate_units(_terrain_path : NodePath, _quantity : int = 1) -> Array:
 			_unit_data["network_master"] = Network.PLAYER_HOST_ID
 			_unit_data["skin_texture"] = model["skin_texture"]
 			_unit_data["mesh_model"] = model["mesh_model"]
+			_unit_data["max_ap"] = int(rand_range(1, 3))
+			_unit_data["max_hp"] = int(rand_range(3, 5))
+			_unit_data["attack_damage"] = int(rand_range(2, 3))
 			#_unit_data["color"] = Color.white
 			_unit_data["team"] = player["id"]
 			_unit_data["translation"] = _grid.translation
@@ -173,6 +176,11 @@ func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	unit.mesh_model = _unit_data["mesh_model"]
 	unit.color = (Color.green if _unit_data["team"] == Global.player_data.id else Color.red) #_unit_data["color"]
 	unit.team = _unit_data["team"]
+	unit.max_ap = _unit_data["max_ap"]
+	unit.ap = _unit_data["max_ap"]
+	unit.max_hp = _unit_data["max_hp"]
+	unit.hp = _unit_data["max_hp"]
+	unit.attack_damage = _unit_data["attack_damage"]
 	unit.is_sync = false
 	
 	unit.connect("on_click", self ,"_on_unit_on_click")
@@ -187,11 +195,11 @@ func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	
 func _on_unit_waypoint_reach(_unit):
 	if is_server():
-		# refil ap for testing only
-		_unit.ap = _unit.ap if _unit.ap > 0 else _unit.max_ap
-		
 		_unit.is_sync = false
 		_unit.sync_unit()
+		
+		# refil ap & hp for testing only
+		_unit.reset_unit()
 	
 func _on_unit_dead(_unit : Unit):
 	_unit.current_grid.occupier = null
@@ -243,9 +251,14 @@ func highlight_near_adjacent_from(_unit : Unit):
 		return
 		
 	selected_unit = _unit
-	for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.ap):
-		i.highlight(true, Color.white if i.is_walkable else Color.red)
-
+	for i in selected_unit.current_grid.get_adjacent_neighbors(selected_unit.ap, false):
+		if i.is_walkable:
+			if is_instance_valid(i.occupier):
+				if i.occupier.is_targetable(selected_unit.team):
+					i.highlight(true, Color.red)
+				continue
+				
+			i.highlight(true, Color.white)
 
 
 

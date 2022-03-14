@@ -6,7 +6,7 @@ signal on_camera_moving(_translation, _zoom)
 onready var _camera = $Camera
 
 export(bool) var is_enable = true
-export(float) var speed = 12.0
+export(float) var speed = 16.0
 
 var min_zoom : float = 2.5
 var max_zoom : float = 10.0

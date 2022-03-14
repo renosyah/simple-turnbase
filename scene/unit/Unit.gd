@@ -1,11 +1,17 @@
 extends KinematicBody
 class_name Unit
 
+############################################################
+# signals
 signal on_ready(_unit)
 signal on_waypoint_reach(_unit)
 signal on_click(_unit)
 signal on_dead(_unit)
 signal on_take_damage(_unit, _hit_by, _damage, _hp, _max_hp)
+signal on_pay_action(_unit, _cost, _ap, _max_ap)
+
+############################################################
+# variables
 
 # tag
 var player = {}
@@ -35,7 +41,7 @@ var attack_damage : int = 1
 var attack_range : int = 1
 
 # action point
-var ap : int = 2 setget _set_ap
+var ap : int = 2
 var max_ap : int = 2
 
 # vitality
@@ -60,6 +66,7 @@ func _network_timmer_timeout():
 		
 	sync_unit()
 	
+	
 func sync_unit():
 	if is_master():
 		rset_unreliable("_puppet_translation", translation)
@@ -67,7 +74,8 @@ func sync_unit():
 		rset_unreliable("_puppet_rotation", rotation)
 		rset_unreliable("_puppet_hp", hp)
 		rset_unreliable("_puppet_ap", ap)
-		
+	
+	
 puppet var _puppet_translation :Vector3 setget _set_puppet_translation
 func _set_puppet_translation(_val :Vector3):
 	_puppet_translation = _val
@@ -81,9 +89,11 @@ func _set_puppet_translation(_val :Vector3):
 	_tween_movement.interpolate_property(self,"translation", translation, _puppet_translation, Network.LATENCY)
 	_tween_movement.start()
 	
+	
 puppet var _puppet_rotation: Vector3 setget _set_puppet_rotation
 func _set_puppet_rotation(_val:Vector3):
 	_puppet_rotation = _val
+	
 	
 puppet var _puppet_hp :float setget _set_puppet_hp
 func _set_puppet_hp(_val :float):
@@ -94,6 +104,7 @@ func _set_puppet_hp(_val :float):
 	
 	hp = _puppet_hp
 	
+	
 puppet var _puppet_ap :float setget _set_puppet_ap
 func _set_puppet_ap(_val :float):
 	_puppet_ap = _val
@@ -101,7 +112,8 @@ func _set_puppet_ap(_val :float):
 	if is_master():
 		return
 	
-	_set_ap(_puppet_ap)
+	ap = _puppet_ap
+	
 	
 puppetsync var _puppet_moving_state : Dictionary setget _set_puppet_moving_state
 func _set_puppet_moving_state(_val : Dictionary):
@@ -111,6 +123,7 @@ func _set_puppet_moving_state(_val : Dictionary):
 		return
 	
 	moving_state = _puppet_moving_state
+	
 	
 remotesync func _occupied_grid(_waypoint_grid : NodePath):
 	var _waypoint_grid_node = get_node_or_null(_waypoint_grid)
@@ -122,21 +135,33 @@ remotesync func _occupied_grid(_waypoint_grid : NodePath):
 	current_grid.occupier = self
 	
 	
+remotesync func _pay_action(_cost, _master_ap : int):
+	if is_master():
+		return
+	
+	ap = _master_ap
+	emit_signal("on_pay_action", self, _cost, ap, max_ap)
+	
+	
 remotesync func _take_damage(_damage : float, _hit_by: NodePath):
 	hit_by = _hit_by
 	emit_signal("on_take_damage", self, hit_by, _damage, hp, max_hp)
+	
 	
 	
 remotesync func _perform_attack(_to: NodePath):
 	if is_dead:
 		return
 	
+	
 remotesync func _dead():
 	is_dead = true
 	set_process(false)
 	
+	
 ############################################################
 # Called when the node enters the scene tree for the first time.
+# override methods
 func _ready():
 	set_process(true)
 	
@@ -162,7 +187,8 @@ func _ready():
 		add_child(_network_timmer)
 		
 	emit_signal("on_ready", self)
-		
+	
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	moving(delta)
@@ -171,7 +197,9 @@ func _process(delta):
 		master_moving(delta)
 	else:
 		puppet_moving(delta)
-		
+	
+############################################################
+# function
 func master_moving(delta):
 	if is_dead:
 		return
@@ -201,12 +229,12 @@ func master_moving(delta):
 func moving(_delta):
 	if is_dead:
 		return
-		
+	
+	
 func is_moving():
 	return not waypoint_grids.empty()
 	
-func _set_ap(_val :int):
-	ap = _val
+	
 	
 func set_waypoints(_waypoint_grids : Array):
 	if not waypoint_grids.empty():
@@ -222,9 +250,12 @@ func set_waypoints(_waypoint_grids : Array):
 	if waypoint_grids.empty():
 		return
 		
-	_set_ap(ap - 1)
+	ap -= 1
 	waypoint_grid = waypoint_grids[0]
 	set_process(true)
+	
+	rpc_unreliable("_pay_action", 1, ap)
+	
 	
 func on_unit_waypoint_reach():
 	rpc("_occupied_grid", waypoint_grid.get_path())
@@ -241,14 +272,18 @@ func on_unit_waypoint_reach():
 		emit_signal("on_waypoint_reach", self)
 		return
 		
-	_set_ap(ap - 1)
+	ap -= 1
 	waypoint_grid = waypoint_grids[0]
 	set_process(true)
-
+	
+	rpc_unreliable("_pay_action", 1, ap)
+	
+	
 func puppet_moving(_delta):
 	if is_dead:
 		return
-		
+	
+	
 func take_damage(_damage : float, _hit_by: NodePath):
 	if not is_master():
 		return
@@ -264,11 +299,13 @@ func take_damage(_damage : float, _hit_by: NodePath):
 		
 	rpc_unreliable("_take_damage", _damage, _hit_by)
 	
+	
 func dead():
 	if not is_master():
 		return
 		
 	rpc("_dead")
+	
 	
 func perform_attack(_to: NodePath):
 	if not is_master():
@@ -282,21 +319,26 @@ func perform_attack(_to: NodePath):
 	
 	rpc_unreliable("_perform_attack", _to)
 	
-	
+############################################################
+# input
 func _on_input_event(camera, event, position, normal, shape_idx):
 	if event is InputEventMouseButton and event.is_action_pressed("left_click"):
 		emit_signal("on_click", self)
 		
 	_input_detection.check_input(event)
 	
+	
 func _on_any_gesture(sig ,event):
 	if event is InputEventSingleScreenTap:
 		emit_signal("on_click", self)
-		
+	
+############################################################
+# utils
 func transform_turning(direction, delta):
 	direction.y = translation.y
 	var new_transform = transform.looking_at(direction, Vector3.UP)
 	transform = transform.interpolate_with(new_transform, turning_speed * delta)
+	
 	
 func is_current_grid_valid() -> bool:
 	if not current_grid:
@@ -306,6 +348,7 @@ func is_current_grid_valid() -> bool:
 		return false
 		
 	return true
+	
 	
 func is_master() -> bool:
 	if not get_tree().network_peer:
@@ -319,5 +362,15 @@ func is_master() -> bool:
 		
 	return true
 	
+	
 func is_targetable(_team) -> bool:
 	return team != _team and not is_dead
+	
+############################################################
+# testing & debug stuff
+func reset_unit():
+	ap = max_ap if ap == 0 else ap
+	sync_unit()
+	rpc("_pay_action", 0, ap)
+
+
