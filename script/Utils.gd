@@ -41,11 +41,24 @@ static func format_time(time, format = FORMAT_DEFAULT, digit_format = "%02d", co
 	
 	
 	
-static func draw_hexagon_point(size : int = 8) -> Array:
+static func draw_hexagon_points(size : int = 8) -> Array:
 	var points = []
 	for z in range(0, (2 * size) - 1):
 		points += print_hex_line(z, size, z)
-	return points
+		
+	var points_no_duplicate = []
+	for i in points:
+		if not is_in_array(i, points_no_duplicate):
+			points_no_duplicate.append(i)
+		
+	return points_no_duplicate
+	
+static func is_in_array(obj : Dictionary, arr : Array) -> bool:
+	for i in arr:
+		if "{x}{y}".format(i["vector"]) == "{x}{y}".format(obj["vector"]):
+			return true
+			
+	return false
 	
 static func print_hex_line(z, size : int,real_z: int) -> Array:
 	var points = []

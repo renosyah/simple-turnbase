@@ -73,7 +73,7 @@ func generate():
 #			})
 #			tile_coordinates.y += TILE_SIZE
 			
-	var points = Utils.draw_hexagon_point(size)
+	var points = Utils.draw_hexagon_points(size)
 	for i in points:
 		if i["type"] == 1:
 			var tile_coordinates := Vector2.ZERO
@@ -83,6 +83,8 @@ func generate():
 			var axial_coordinate = HexGrid.get_hex_at(tile_coordinates).axial_coords
 			var base_key = _get_base_grid_key(simplex.get_noise_2d(tile_coordinates.x, tile_coordinates.y))
 			var top_key = _get_grid_top_key(base_key)
+			
+			print(axial_coordinate)
 			
 			generated_grid.append({
 				"is_walkable" : _check_is_walkable(base_key, top_key),
