@@ -17,6 +17,7 @@ var selected_unit : Unit
 ################################################################
 # server variables
 var game_flag = GAME_LOADING
+var turn = 0
 var players = []
 
 ################################################################
@@ -80,11 +81,12 @@ func is_network_on() -> bool:
 func get_joined_players():
 	for player in Global.mp_players:
 		var data = {
-			"id" : player.id,
-			"name" : player.name,
+			"id" : player["id"],
+			"turn" : player["turn"],
+			"name" : player["name"],
 			"flag_status" : PLAYER_STATUS_NOT_READY
 		}
-		if player.has("is_bot"):
+		if player.has("is_bot") and player["is_bot"]:
 			data["is_bot"] = true
 			data["flag_status"] = PLAYER_STATUS_READY
 			
@@ -93,7 +95,6 @@ func get_joined_players():
 func player_ready():
 	var data = {
 		"id" : Global.player_data.id,
-		"name" :  Global.player_data.name,
 		"flag_status" : PLAYER_STATUS_READY
 	}
 	rpc("_update_player_joined", data)
@@ -104,15 +105,19 @@ remotesync func _update_player_joined(data : Dictionary):
 			update_dictionary(player, data) 
 			break
 			
-	players_updated()
+	players_updated(is_all_player_ready())
 	
 	
-func players_updated():
-	pass
+func players_updated(_is_all_ready : bool):
+	if not _is_all_ready:
+		return
+		
+	game_flag = GAME_START
 	
 func update_dictionary(dic, update : Dictionary):
 	for key in dic.keys():
-		dic[key] = update[key]
+		if update.has(key):
+			dic[key] = update[key]
 		
 func count_player_ready() -> int:
 	var num = 0
@@ -130,6 +135,43 @@ func is_all_player_ready() -> bool:
 			return false
 		
 	return true
+	
+
+################################################################
+ # turn
+func next_turn():
+	if is_server():
+		_next_turn()
+		
+	else:
+		rpc_id(Network.PLAYER_HOST_ID,"_next_turn")
+	
+remote func _next_turn():
+	if not is_server():
+		return
+		
+	turn += 1
+	if turn > players.size() - 1:
+		turn = 0
+		
+		
+	rpc("_on_change_turn", turn)
+	
+remotesync func _on_change_turn(_turn : int):
+	if not is_server():
+		turn = _turn
+		
+	on_change_turn()
+	
+func on_change_turn():
+	pass
+	
+func is_my_turn() -> bool:
+	for i in players:
+		if i["id"] == Global.player_data.id and i["turn"] == turn:
+			return true
+			
+	return false
 	
 ################################################################
  # unit
@@ -169,14 +211,14 @@ func generate_units(_terrain_path : NodePath, _quantity : int = 1) -> Array:
 	return units
 	
 remotesync func _spawn_units(_unit_holder_path : NodePath, _units : Array):
+	for  data in _units:
+		spawn_unit(_unit_holder_path, data)
+		
+func spawn_unit(_unit_holder_path : NodePath, _unit_data : Dictionary):
 	var _unit_holder = get_node_or_null(_unit_holder_path)
 	if not is_instance_valid(_unit_holder):
 		return
 		
-	for  data in _units:
-		spawn_unit(_unit_holder, data)
-		
-func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	var unit = preload("res://scene/unit/monster/monster.tscn").instance()
 	unit.name = _unit_data["name"]
 	unit.set_network_master(_unit_data["network_master"])
@@ -204,15 +246,64 @@ func spawn_unit(_unit_holder : Node, _unit_data : Dictionary):
 	
 	
 func _on_unit_attack_performed(_unit):
-	_unit.reset_unit()
+	#_unit.reset_unit()
+	pass
 	
 func _on_unit_waypoint_reach(_unit):
-	_unit.reset_unit()
+	#_unit.reset_unit()
+	pass
 	
 func _on_unit_dead(_unit : Unit):
-	_unit.current_grid.occupier = null
-	_unit.queue_free()
+	if _unit.is_current_grid_valid():
+		_unit.current_grid.occupier = null
+		_unit.queue_free()
 	
+func count_movable_unit(_unit_holder_path : NodePath, _player_id : String) -> bool:
+	var count = 0
+	var _unit_holder = get_node_or_null(_unit_holder_path)
+	if not is_instance_valid(_unit_holder):
+		return count
+		
+	for i in _unit_holder.get_children():
+		if i.team == _player_id and i.ap > 0:
+			count += 1
+		
+	return count
+	
+func get_all_unit(_unit_holder_path : NodePath, _player_id : String) -> Array:
+	var units = []
+	
+	var _unit_holder = get_node_or_null(_unit_holder_path)
+	if not is_instance_valid(_unit_holder):
+		return units
+		
+	for i in _unit_holder.get_children():
+		if i.team == _player_id:
+			units.append(i)
+			
+	return units
+	
+var _cycle_movable_unit_pos = 0
+func cycle_movable_unit(_unit_holder_path : NodePath, _player_id : String) -> Unit:
+	var units = []
+	
+	var _unit_holder = get_node_or_null(_unit_holder_path)
+	if not is_instance_valid(_unit_holder):
+		return null
+		
+	for i in _unit_holder.get_children():
+		if i.team == _player_id and i.ap > 0:
+			units.append(i)
+			
+	if units.empty():
+		return null
+		
+	_cycle_movable_unit_pos += 1
+	if _cycle_movable_unit_pos > units.size() - 1:
+		_cycle_movable_unit_pos = 0
+		
+	return units[_cycle_movable_unit_pos]
+
 ################################################################
  # unit movement
 func move_unit(_unit : Unit, _terrain : Spatial, from, to : Vector2):
@@ -271,11 +362,11 @@ func is_grid_is_highlight(_unit : Unit) -> bool:
 	return _unit.current_grid.is_highlight()
 	
 func clear_highlight(_terrain : Spatial):
-	if is_instance_valid(selected_unit):
-		for i in _terrain.get_grids():
-			i.highlight(false)
-			
-func toggle_highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
+	for i in _terrain.get_grids():
+		i.highlight(false)
+		
+		
+func highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
 	var grids_in_range = []
 	var enemy_in_range = []
 	
@@ -294,17 +385,17 @@ func toggle_highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
 				
 	if enemy_in_range.size() > 0:
 		for i in grids_in_range:
-			i.highlight(not i.is_highlight(), Color.white)
+			i.highlight(true, Color.white)
 			
 		for i in enemy_in_range:
-			i.highlight(not i.is_highlight(), Color.red)
+			i.highlight(true, Color.red)
 			
 		return
 		
 	# no enemy, change travel mode
 	for i in _unit.current_grid.get_adjacent_neighbors(_unit.ap, true):
 		if i.is_walkable and not is_instance_valid(i.occupier):
-			i.highlight(not i.is_highlight(), Color.white)
+			i.highlight(true, Color.white)
 	
 	
 ############################################################
@@ -315,6 +406,10 @@ func add_audio_player():
 	audio_sfx = AudioStreamPlayer.new()
 	audio_sfx.bus = "sfx"
 	add_child(audio_sfx)
+	
+func play_audio_click():
+	audio_sfx.stream = preload("res://assets/sound/click.wav")
+	audio_sfx.play()
 	
 func play_audio_unit_selected():
 	audio_sfx.stream = preload("res://assets/sound/selection_click.wav")

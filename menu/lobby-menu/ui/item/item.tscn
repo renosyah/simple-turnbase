@@ -35,21 +35,32 @@ __meta__ = {
 }
 
 [node name="team_color" type="ColorRect" parent="Panel/HBoxContainer"]
-visible = false
 margin_right = 100.0
 margin_bottom = 97.0
 rect_min_size = Vector2( 100, 50 )
-color = Color( 0.215686, 0.215686, 0.215686, 1 )
+color = Color( 0.396078, 0.396078, 0.396078, 1 )
+
+[node name="turn" type="Label" parent="Panel/HBoxContainer/team_color"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 3 )
+text = "1"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="MarginContainer2" type="MarginContainer" parent="Panel/HBoxContainer"]
-margin_right = 10.0
+margin_left = 104.0
+margin_right = 114.0
 margin_bottom = 97.0
 rect_min_size = Vector2( 10, 0 )
 mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Panel/HBoxContainer"]
-margin_left = 14.0
-margin_right = 145.0
+margin_left = 118.0
+margin_right = 249.0
 margin_bottom = 97.0
 
 [node name="player_name" type="Label" parent="Panel/HBoxContainer/VBoxContainer"]
@@ -72,7 +83,7 @@ __meta__ = {
 }
 
 [node name="MarginContainer" type="MarginContainer" parent="Panel/HBoxContainer"]
-margin_left = 149.0
+margin_left = 253.0
 margin_right = 451.0
 margin_bottom = 97.0
 rect_min_size = Vector2( 100, 0 )

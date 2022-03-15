@@ -39,3 +39,7 @@ environment = SubResource( 2 )
 [connection signal="on_grid_click" from="terrain" to="." method="_on_terrain_on_grid_click"]
 [connection signal="on_spawning_grid" from="terrain" to="." method="_on_terrain_on_spawning_grid"]
 [connection signal="on_terrain_ready" from="terrain" to="." method="_on_terrain_on_terrain_ready"]
+[connection signal="deselect_unit" from="ui" to="." method="_on_ui_deselect_unit"]
+[connection signal="find_movable_unit" from="ui" to="." method="_on_ui_find_movable_unit"]
+[connection signal="get_unit_info" from="ui" to="." method="_on_ui_get_unit_info"]
+[connection signal="skip_turn" from="ui" to="." method="_on_ui_skip_turn"]

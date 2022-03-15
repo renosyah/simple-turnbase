@@ -1,5 +1,6 @@
 extends BattleMP
 
+onready var _camera = $cameraPivot
 onready var _unit_holder = $unit_holder
 onready var _spawn_delay = $spawn_delay
 onready var _terrain = $terrain
@@ -18,6 +19,37 @@ func host_ready(grids : Array):
 	Global.rpc("on_host_game_session_ready", {"grids" : grids})
 	
 ############################################################
+# ui
+func _on_ui_deselect_unit():
+	.play_audio_click()
+	selected_unit = null
+	.clear_highlight(_terrain)
+	
+func _on_ui_find_movable_unit():
+	.play_audio_click()
+	var count = .count_movable_unit(_unit_holder.get_path(), Global.player_data.id)
+	if count <= 0:
+		return
+		
+	var unit = .cycle_movable_unit(_unit_holder.get_path(), Global.player_data.id)
+	if not is_instance_valid(unit):
+		return
+		
+	_camera.translation = unit.translation
+	
+func _on_ui_get_unit_info():
+	pass # Replace with function body.
+	
+	
+func _on_ui_skip_turn():
+	selected_unit = null
+	_ui.display_control(false)
+	_ui.display_loading_turn(true)
+	.play_audio_click()
+	.clear_highlight(_terrain)
+	.next_turn()
+	
+############################################################
 # terrain
 func generate_terrain():
 	randomize()
@@ -26,12 +58,12 @@ func generate_terrain():
 	_terrain.density = rand_range(0.25, 0.55)
 	_terrain.generate()
 	
+func _on_terrain_on_terrain_ready():
+	.player_ready()
+	
 func _on_terrain_on_finish_generate(_generated_grid : Array):
 	_terrain.spawn_grid()
 	host_ready(_generated_grid)
-	
-func _on_terrain_on_terrain_ready():
-	.player_ready()
 	
 func _on_terrain_on_spawning_grid(task_done, max_task : int):
 	_ui.display_loading_progress("Generating Map...", task_done, max_task)
@@ -46,8 +78,14 @@ func _on_terrain_on_grid_click(_node : StaticBody):
 				_node.axial_coordinate
 			)
 			.play_audio_unit_move()
-			
+		
+	else:
+		.play_audio_click()
+		
+	selected_unit = null
+	_ui.display_selected_unit(false)
 	.clear_highlight(_terrain)
+	
 	
 ############################################################
 # unit
@@ -55,12 +93,15 @@ func _on_unit_on_click(_unit : Unit):
 	if .is_player_own_unit(_unit):
 		# selection/movement mode
 		if .is_this_currently_selected_unit(_unit):
-			.toggle_highlight_adjacent_grid(_terrain, _unit)
+			selected_unit = null
+			.clear_highlight(_terrain)
+			_ui.display_selected_unit(false)
 			
 		else:
 			selected_unit = _unit
 			.clear_highlight(_terrain)
-			.toggle_highlight_adjacent_grid(_terrain, selected_unit)
+			.highlight_adjacent_grid(_terrain, selected_unit)
+			_ui.display_selected_unit(true)
 			
 		play_audio_unit_selected()
 		
@@ -69,28 +110,38 @@ func _on_unit_on_click(_unit : Unit):
 		if .is_selected_unit_valid() and .is_grid_is_highlight(_unit):
 			.attack_unit(selected_unit, _unit)
 			.clear_highlight(_terrain)
+			selected_unit = null
+			_ui.display_selected_unit(false)
 			play_audio_unit_attacking()
+			
 		else:
 			play_audio_invalid_click()
-			
-func _on_unit_waypoint_reach(_unit):
-	._on_unit_waypoint_reach(_unit)
-	if .is_this_currently_selected_unit(_unit):
-		.toggle_highlight_adjacent_grid(_terrain, _unit)
 	
 ############################################################
-# player
-func players_updated():
-	.players_updated()
-	if not .is_all_player_ready():
+# player status
+func players_updated(_is_all_ready : bool):
+	.players_updated(_is_all_ready)
+	if not _is_all_ready:
 		_ui.display_loading_progress("Waiting players...", .count_player_ready(), players.size())
 		return
 		
 	_ui.display_loading(false)
-	game_flag = GAME_START
-	
+	_ui.display_control(is_my_turn())
+	_ui.display_loading_turn(not is_my_turn())
+		
 	rpc("_spawn_units", _unit_holder.get_path(), .generate_units(_terrain.get_path(), 4))
 	
+############################################################
+# turn
+func on_change_turn():
+	.on_change_turn()
+	_ui.display_control(is_my_turn())
+	_ui.display_loading_turn(not is_my_turn())
+	
+	for unit in _unit_holder.get_children():
+		unit.reset_unit()
+	
+
 
 
 

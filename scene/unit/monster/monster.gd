@@ -85,16 +85,20 @@ func _on_finish_dead():
 	emit_signal("on_dead", self)
 	
 func _on_attack_performed():
+	._on_attack_performed()
 	is_attacking = false
-	emit_signal("on_attack_performed", self)
 	
 func on_click():
 	.on_click()
 	_tween.interpolate_property(self,"scale", Vector3.ONE * 1.3, Vector3.ONE, 0.2)
 	_tween.interpolate_property(self,"translation:y", 0.2, 0.0, 0.2)
 	_tween.start()
-
-
+	
+############################################################
+# testing & debug stuff
+func reset_unit():
+	.reset_unit()
+	_ap_bar.set_message(str(ap) + "/" + str(max_ap))
 
 
 

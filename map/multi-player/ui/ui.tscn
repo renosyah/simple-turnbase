@@ -1,9 +1,46 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=1]
 [ext_resource path="res://map/multi-player/ui/ui.gd" type="Script" id=2]
 [ext_resource path="res://assets/ui/bar/bar_over.png" type="Texture" id=3]
 [ext_resource path="res://assets/ui/bar/bar.png" type="Texture" id=4]
+[ext_resource path="res://assets/ui/icon/recruit.png" type="Texture" id=5]
+[ext_resource path="res://assets/button/bg_press.png" type="Texture" id=6]
+[ext_resource path="res://assets/button/bg.png" type="Texture" id=7]
+[ext_resource path="res://assets/ui/icon/time.png" type="Texture" id=8]
+[ext_resource path="res://assets/ui/icon/warning.png" type="Texture" id=9]
+[ext_resource path="res://assets/ui/icon/stop.png" type="Texture" id=10]
+
+[sub_resource type="Animation" id=1]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Label2:text")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ "Waiting Turn" ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_name = "loading_turn"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Label2:text")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2, 0.4, 0.6, 0.9 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 1,
+"values": [ "Waiting Turn", "Waiting Turn.", "Waiting Turn..", "Waiting Turn...", "Waiting Turn..." ]
+}
 
 [node name="ui" type="Control"]
 anchor_right = 1.0
@@ -16,7 +53,15 @@ __meta__ = {
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="loading" type="Control" parent="CanvasLayer"]
+[node name="main_ui" type="Control" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="control" type="Control" parent="CanvasLayer/main_ui"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -25,12 +70,146 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer/loading"]
+[node name="selection_mode_layout" type="HBoxContainer" parent="CanvasLayer/main_ui/control"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -224.0
+margin_bottom = -24.0
+rect_min_size = Vector2( 0, 100 )
+mouse_filter = 2
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="find_movable_unit_btn" type="TextureButton" parent="CanvasLayer/main_ui/control/selection_mode_layout"]
+self_modulate = Color( 0.188235, 0.188235, 0.188235, 1 )
+margin_left = 141.0
+margin_right = 291.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 150, 200 )
+size_flags_horizontal = 4
+texture_normal = ExtResource( 7 )
+texture_pressed = ExtResource( 6 )
+expand = true
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/main_ui/control/selection_mode_layout/find_movable_unit_btn"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 5 )
+expand = true
+stretch_mode = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/main_ui/control/selection_mode_layout"]
+margin_left = 295.0
+margin_right = 305.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 10, 0 )
+
+[node name="skip_turn" type="TextureButton" parent="CanvasLayer/main_ui/control/selection_mode_layout"]
+self_modulate = Color( 0.678431, 0.188235, 0.188235, 1 )
+margin_left = 309.0
+margin_right = 459.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 150, 200 )
+size_flags_horizontal = 4
+texture_normal = ExtResource( 7 )
+texture_pressed = ExtResource( 6 )
+expand = true
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/main_ui/control/selection_mode_layout/skip_turn"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 8 )
+expand = true
+stretch_mode = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="unit_mode_layout" type="HBoxContainer" parent="CanvasLayer/main_ui/control"]
+visible = false
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -224.0
+margin_bottom = -124.0
+rect_min_size = Vector2( 0, 100 )
+mouse_filter = 2
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="unit_info" type="TextureButton" parent="CanvasLayer/main_ui/control/unit_mode_layout"]
+visible = false
+self_modulate = Color( 0.188235, 0.188235, 0.188235, 1 )
+margin_left = 141.0
+margin_right = 291.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 150, 200 )
+size_flags_horizontal = 4
+texture_normal = ExtResource( 7 )
+texture_pressed = ExtResource( 6 )
+expand = true
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/main_ui/control/unit_mode_layout/unit_info"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 9 )
+expand = true
+stretch_mode = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer2" type="MarginContainer" parent="CanvasLayer/main_ui/control/unit_mode_layout"]
+visible = false
+margin_left = 295.0
+margin_right = 305.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 10, 0 )
+
+[node name="deselect" type="TextureButton" parent="CanvasLayer/main_ui/control/unit_mode_layout"]
+self_modulate = Color( 0.678431, 0.188235, 0.188235, 1 )
+margin_left = 225.0
+margin_right = 375.0
+margin_bottom = 200.0
+rect_min_size = Vector2( 150, 200 )
+size_flags_horizontal = 4
+texture_normal = ExtResource( 7 )
+texture_pressed = ExtResource( 6 )
+expand = true
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/main_ui/control/unit_mode_layout/deselect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 10 )
+expand = true
+stretch_mode = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="loading" type="Control" parent="CanvasLayer/main_ui"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/main_ui/loading"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0.0980392, 0.0980392, 0.0980392, 0.784314 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/loading"]
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/main_ui/loading"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -43,7 +222,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="CanvasLayer/loading/VBoxContainer"]
+[node name="Label" type="Label" parent="CanvasLayer/main_ui/loading/VBoxContainer"]
 margin_right = 413.0
 margin_bottom = 40.0
 custom_colors/font_color = Color( 1, 1, 1, 1 )
@@ -54,7 +233,7 @@ text = "Generating Map..."
 align = 1
 valign = 1
 
-[node name="loading_bar" type="TextureProgress" parent="CanvasLayer/loading/VBoxContainer"]
+[node name="loading_bar" type="TextureProgress" parent="CanvasLayer/main_ui/loading/VBoxContainer"]
 margin_top = 44.0
 margin_right = 413.0
 margin_bottom = 94.0
@@ -69,3 +248,69 @@ __meta__ = {
 "_edit_use_anchors_": false,
 "_editor_description_": ""
 }
+
+[node name="loading_turn" type="Control" parent="CanvasLayer/main_ui"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer/main_ui/loading_turn"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.0980392, 0.0980392, 0.0980392, 0.109804 )
+
+[node name="loading_anim" type="Control" parent="CanvasLayer/main_ui/loading_turn"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -138.0
+margin_top = 51.0
+margin_right = 142.0
+margin_bottom = 221.0
+rect_min_size = Vector2( 280, 170 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label2" type="Label" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -206.5
+margin_top = -20.0
+margin_right = 206.5
+margin_bottom = 20.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 1 )
+text = "Waiting Turn"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
+modulate = Color( 1, 1, 1, 0.541176 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 140, 85 )
+texture = ExtResource( 8 )
+stretch_mode = 4
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
+autoplay = "loading_turn"
+anims/RESET = SubResource( 1 )
+anims/loading_turn = SubResource( 2 )
+
+[connection signal="pressed" from="CanvasLayer/main_ui/control/selection_mode_layout/find_movable_unit_btn" to="." method="_on_find_movable_unit_btn_pressed"]
+[connection signal="pressed" from="CanvasLayer/main_ui/control/selection_mode_layout/skip_turn" to="." method="_on_skip_turn_pressed"]
+[connection signal="pressed" from="CanvasLayer/main_ui/control/unit_mode_layout/unit_info" to="." method="_on_unit_info_pressed"]
+[connection signal="pressed" from="CanvasLayer/main_ui/control/unit_mode_layout/deselect" to="." method="_on_deselect_pressed"]

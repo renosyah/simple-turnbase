@@ -299,7 +299,11 @@ func perform_attack(_to: NodePath):
 	_target.take_damage(attack_damage, get_path())
 	
 	ap -= 1
+	rpc_unreliable("_pay_action", 1, ap)
 	rpc_unreliable("_perform_attack", _to)
+	
+func _on_attack_performed():
+	emit_signal("on_attack_performed", self)
 	
 ############################################################
 # input
