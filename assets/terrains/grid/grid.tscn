@@ -19,6 +19,7 @@ script = ExtResource( 2 )
 [node name="highlight" type="MeshInstance" parent="pivot"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0.2, 0 )
 visible = false
+generate_lightmap = false
 mesh = ExtResource( 3 )
 skeleton = NodePath("../..")
 software_skinning_transform_normals = false
@@ -26,6 +27,7 @@ material/0 = SubResource( 2 )
 
 [node name="top" type="MeshInstance" parent="pivot"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0 )
+generate_lightmap = false
 skeleton = NodePath("../..")
 software_skinning_transform_normals = false
 

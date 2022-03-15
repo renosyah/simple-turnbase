@@ -11,7 +11,6 @@ const PLAYER_STATUS_READY = "READY"
 onready var _server_advertise = $server_advertise
 onready var _player_holder = $CanvasLayer/control/VBoxContainer/ScrollContainer/VBoxContainer
 
-onready var _scramble_button = $CanvasLayer/control/HBoxContainer/scramble
 onready var _play_button = $CanvasLayer/control/HBoxContainer/play
 onready var _ready_button = $CanvasLayer/control/HBoxContainer/ready
 onready var _add_bot_button_icon = $CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer/add_bot/ColorRect2
@@ -73,7 +72,6 @@ func _ready():
 	_ready_button.visible = not is_server()
 	_ready_button.self_modulate = BUTTON_BATTLE_ENABLE_COLOR
 	
-	_scramble_button.visible = is_server()
 	_add_bot_button_icon.visible = ENABLE_BOT
 	
 	if is_server():
@@ -145,27 +143,6 @@ func _got_kickout():
 
 ################################################################
 # ui action
-func _on_scramble_pressed():
-	if not is_server():
-		return
-		
-	if not is_all_player_ready():
-		return
-		
-	var turns = []
-	for i in range(0, player_joined.size()):
-		turns.append(i)
-		
-	randomize()
-	turns.shuffle()
-		
-	for i in player_joined:
-		var turn = turns[randi() % turns.size()]
-		i["turn"] = turn
-		turns.erase(turn)
-		
-	rpc("_update_player_joined", player_joined)
-	
 func _on_ready_pressed():
 	_ready_button.self_modulate = BUTTON_BATTLE_DISABLE_COLOR
 	set_player_ready()
@@ -176,6 +153,8 @@ func _on_play_pressed():
 		
 	if not is_all_player_ready():
 		return
+		
+	scramble_turn_order()
 		
 	Global.mp_players = player_joined
 	get_tree().change_scene("res://map/multi-player/host/battle.tscn")
@@ -285,7 +264,22 @@ func is_all_player_ready() -> bool:
 		if i.flag == PLAYER_STATUS_NOT_READY:
 			return false
 	return true
-
+	
+func scramble_turn_order():
+	var turns = []
+	for i in range(0, player_joined.size()):
+		turns.append(i)
+		
+	randomize()
+	turns.shuffle()
+		
+	for i in player_joined:
+		var turn = turns[randi() % turns.size()]
+		i["turn"] = turn
+		turns.erase(turn)
+		
+	rpc("_update_player_joined", player_joined)
+	
 
 
 

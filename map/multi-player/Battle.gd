@@ -3,6 +3,7 @@ class_name BattleMP
 
 const PLAYER_STATUS_NOT_READY = 0
 const PLAYER_STATUS_READY = 1
+const PLAYER_STATUS_OVER = 2
 
 const GAME_LOADING = 0
 const GAME_START = 1
@@ -91,7 +92,8 @@ func get_joined_players():
 			data["flag_status"] = PLAYER_STATUS_READY
 			
 		players.append(data)
-		
+	
+	
 func player_ready():
 	var data = {
 		"id" : Global.player_data.id,
@@ -136,7 +138,6 @@ func is_all_player_ready() -> bool:
 		
 	return true
 	
-	
 ################################################################
  # turn
 func next_turn():
@@ -153,7 +154,6 @@ remote func _next_turn():
 	turn += 1
 	if turn > players.size() - 1:
 		turn = 0
-		
 		
 	rpc("_on_change_turn", turn)
 	
@@ -255,7 +255,7 @@ func _on_unit_dead(_unit : Unit):
 	_unit.queue_free()
 ##
 	
-func count_alive_unit(_unit_holder : Node, _player_id : String) -> bool:
+func count_alive_unit(_unit_holder : Node, _player_id : String) -> int:
 	var count = 0
 	for i in _unit_holder.get_children():
 		if not is_instance_valid(i):
@@ -269,7 +269,7 @@ func count_alive_unit(_unit_holder : Node, _player_id : String) -> bool:
 		
 	return count
 	
-func count_movable_unit(_unit_holder : Node, _player_id : String) -> bool:
+func count_movable_unit(_unit_holder : Node, _player_id : String) -> int:
 	var count = 0
 	for i in _unit_holder.get_children():
 		if i.team == _player_id and i.ap > 0:

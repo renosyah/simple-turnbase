@@ -17,16 +17,21 @@ onready var _loading_turn = $CanvasLayer/main_ui/loading_turn
 onready var _loading_image = $CanvasLayer/main_ui/loading_turn/loading_anim/TextureRect
 
 onready var _game_over = $CanvasLayer/main_ui/game_over
-onready var _game_over_condition = $CanvasLayer/main_ui/game_over/VBoxContainer/condition
-onready var _game_over_message = $CanvasLayer/main_ui/game_over/VBoxContainer/winner
+onready var _game_over_layout = $CanvasLayer/main_ui/game_over/Control
+onready var _game_over_condition = $CanvasLayer/main_ui/game_over/Control/VBoxContainer/condition
+onready var _game_over_message = $CanvasLayer/main_ui/game_over/Control/VBoxContainer/winner
+onready var _exit_button = $CanvasLayer/main_ui/game_over/exit_button
 
 onready var _dialog_exit_option = $CanvasLayer/main_ui/simple_dialog_option
+
+var is_spectating = false
 
 func _ready():
 	_selection_mode_layout.visible = true
 	_dialog_exit_option.visible = false
 	_unit_mode_layout.visible = false
 	_loading_turn.visible = false
+	_exit_button.visible = false
 	_game_over.visible = false
 	display_loading(false)
 	set_process(false)
@@ -56,9 +61,15 @@ func display_loading_progress(task_name : String, progress : int, max_task : int
 	_loading_bar.max_value = max_task
 	
 func display_control(_show : bool):
+	if is_spectating:
+		return
+		
 	_control.visible = _show
 	
 func display_loading_turn(_show : bool):
+	if is_spectating:
+		return
+		
 	_loading_turn.visible = _show
 	set_process(_show)
 	
@@ -77,6 +88,8 @@ func display_game_over(_is_win : bool, _message : String):
 	_control.visible = false
 	_loading_turn.visible = false
 	_game_over.visible = true
+	_game_over_layout.visible = true
+	_exit_button.visible = false
 	_game_over_condition.text = "You win!" if _is_win else "You Lose!"
 	_game_over_message.text = "All enemy has been eliminated!" if _is_win else _message
 	
@@ -93,16 +106,24 @@ func _on_deselect_pressed():
 	display_selection_mode()
 	emit_signal("deselect_unit")
 	
+func _on_spectate_button_pressed():
+	_control.visible = false
+	_loading_turn.visible = false
+	_game_over_layout.visible = false
+	_exit_button.visible = true
+	
 func _on_exit_button_pressed():
-	Network.disconnect_from_server()
-	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
+	_on_back_pressed()
 	
 func _on_back_pressed():
 	_dialog_exit_option.display_message("Attention!","Are you sure want quit?")
 	_dialog_exit_option.visible = true
 	
 func _on_simple_dialog_option_on_yes():
-	_on_exit_button_pressed()
+	Network.disconnect_from_server()
+	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
+
+
 
 
 

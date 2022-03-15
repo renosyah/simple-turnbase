@@ -133,6 +133,9 @@ func _on_unit_on_click(_unit : Unit):
 			play_audio_invalid_click()
 	
 func _on_unit_dead(_unit : Unit):
+	if _unit.team == Global.player_data.id and .count_alive_unit(_unit_holder, Global.player_data.id) <= 0:
+		_ui.display_game_over(false, "Your have no unit left!")
+		
 	var winner = .check_game_over_condition(_unit_holder)
 	if not winner.empty():
 		_ui.display_game_over(winner.id == Global.player_data.id, "Winner is " + winner.name + "!")
@@ -156,10 +159,26 @@ func players_updated(_is_all_ready : bool):
 # turn
 func on_change_turn():
 	.on_change_turn()
-	var _is_my_turn = .is_my_turn(Global.player_data.id)
-	_ui.display_control(_is_my_turn)
-	_ui.display_loading_turn(not _is_my_turn)
 	
+	_spawn_delay.start()
+	yield(_spawn_delay, "timeout")
+	
+	var _is_my_unit_gone = .count_alive_unit(_unit_holder, Global.player_data.id) <= 0
+	var _is_my_turn = .is_my_turn(Global.player_data.id)
+	
+	# skip turn
+	if _is_my_turn and _is_my_unit_gone:
+		_ui.display_control(false)
+		_ui.display_loading_turn(false)
+		.next_turn()
+		
+	elif _is_my_turn and not _is_my_unit_gone:
+		_ui.display_control(true)
+		_ui.display_loading_turn(false)
+		
+	elif not _is_my_turn and not _is_my_unit_gone:
+		_ui.display_control(false)
+		_ui.display_loading_turn(true)
 	
 
 

@@ -224,6 +224,7 @@ transform = Transform( 0.3, 0, 0, 0, 0.3, 0, 0, 0, 0.3, 0, 0.1, 0 )
 
 [node name="MeshInstance" type="MeshInstance" parent="pivot"]
 transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0 )
+generate_lightmap = false
 mesh = ExtResource( 1 )
 skeleton = NodePath("../..")
 software_skinning_transform_normals = false
