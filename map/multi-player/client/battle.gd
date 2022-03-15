@@ -65,6 +65,10 @@ func _on_terrain_on_spawning_grid(task_done, max_task : int):
 	_ui.display_loading_progress("Generating Map...", task_done, max_task)
 	
 func _on_terrain_on_grid_click(_node : StaticBody):
+	if not .is_my_turn(Global.player_data.id):
+		.play_audio_click()
+		return
+		
 	if is_instance_valid(selected_unit) and _node.is_highlight():
 		if _node.is_walkable:
 			.move_unit(
@@ -87,6 +91,10 @@ func _on_terrain_on_grid_click(_node : StaticBody):
 ############################################################
 # unit
 func _on_unit_on_click(_unit : Unit):
+	if not .is_my_turn(Global.player_data.id):
+		.play_audio_invalid_click()
+		return
+		
 	if .is_player_own_unit(_unit):
 		# selection/movement mode
 		if .is_this_currently_selected_unit(_unit):
@@ -122,16 +130,19 @@ func players_updated(_is_all_ready : bool):
 		_ui.display_loading_progress("Waiting players...", .count_player_ready(), players.size())
 		return
 		
+	var _is_my_turn = .is_my_turn(Global.player_data.id)
+	_ui.display_control(_is_my_turn)
+	_ui.display_loading_turn(not _is_my_turn)
 	_ui.display_loading(false)
-	_ui.display_control(is_my_turn())
-	_ui.display_loading_turn(not is_my_turn())
 	
 ############################################################
 # turn
 func on_change_turn():
 	.on_change_turn()
-	_ui.display_control(is_my_turn())
-	_ui.display_loading_turn(not is_my_turn())
+	var _is_my_turn = .is_my_turn(Global.player_data.id)
+	_ui.display_control(_is_my_turn)
+	_ui.display_loading_turn(not _is_my_turn)
+	
 	
 
 

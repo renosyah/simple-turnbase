@@ -166,9 +166,9 @@ remotesync func _on_change_turn(_turn : int):
 func on_change_turn():
 	pass
 	
-func is_my_turn() -> bool:
+func is_my_turn(_player_id : String) -> bool:
 	for i in players:
-		if i["id"] == Global.player_data.id and i["turn"] == turn:
+		if i["id"] == _player_id and i["turn"] == turn:
 			return true
 			
 	return false
@@ -256,7 +256,7 @@ func _on_unit_waypoint_reach(_unit):
 func _on_unit_dead(_unit : Unit):
 	if _unit.is_current_grid_valid():
 		_unit.current_grid.occupier = null
-		_unit.queue_free()
+	_unit.queue_free()
 	
 func count_movable_unit(_unit_holder_path : NodePath, _player_id : String) -> bool:
 	var count = 0

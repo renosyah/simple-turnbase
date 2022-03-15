@@ -358,5 +358,5 @@ func is_enemy(_team) -> bool:
 ############################################################
 # testing & debug stuff
 func reset_unit():
-	ap = max_ap if ap == 0 else ap
+	ap = max_ap
 

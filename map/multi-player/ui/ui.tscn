@@ -253,6 +253,7 @@ __meta__ = {
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -260,6 +261,7 @@ __meta__ = {
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer/main_ui/loading_turn"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color( 0.0980392, 0.0980392, 0.0980392, 0.109804 )
 
 [node name="loading_anim" type="Control" parent="CanvasLayer/main_ui/loading_turn"]
@@ -270,6 +272,7 @@ margin_top = 51.0
 margin_right = 142.0
 margin_bottom = 221.0
 rect_min_size = Vector2( 280, 170 )
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
