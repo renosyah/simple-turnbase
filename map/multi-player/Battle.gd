@@ -136,7 +136,7 @@ func is_all_player_ready() -> bool:
 		
 	return true
 	
-
+	
 ################################################################
  # turn
 func next_turn():
@@ -240,7 +240,7 @@ func spawn_unit(_unit_holder_path : NodePath, _unit_data : Dictionary):
 	unit.current_grid = get_node(_unit_data["grid"])
 	unit.current_grid.occupier = unit
 	
-	
+##
 func _on_unit_attack_performed(_unit):
 	#_unit.reset_unit()
 	pass
@@ -253,6 +253,21 @@ func _on_unit_dead(_unit : Unit):
 	if _unit.is_current_grid_valid():
 		_unit.current_grid.occupier = null
 	_unit.queue_free()
+##
+	
+func count_alive_unit(_unit_holder : Node, _player_id : String) -> bool:
+	var count = 0
+	for i in _unit_holder.get_children():
+		if not is_instance_valid(i):
+			continue
+			
+		if i.is_dead:
+			continue
+			
+		if i.team == _player_id:
+			count += 1
+		
+	return count
 	
 func count_movable_unit(_unit_holder : Node, _player_id : String) -> bool:
 	var count = 0
@@ -285,6 +300,22 @@ func cycle_movable_unit(_unit_holder : Node, _player_id : String) -> Unit:
 		_cycle_movable_unit_pos = 0
 		
 	return units[_cycle_movable_unit_pos]
+	
+func check_game_over_condition(_unit_holder : Node) -> Dictionary:
+	var player_units = {}
+	var all_unit_remain = 0
+	for i in players:
+		var data = i.duplicate()
+		var count = count_alive_unit(_unit_holder, i.id)
+		data["units"] = count
+		player_units[i.id] = data
+		all_unit_remain += count
+		
+	for player in player_units.values():
+		if player["units"] == all_unit_remain:
+			return player
+			
+	return {}
 
 ################################################################
  # unit movement

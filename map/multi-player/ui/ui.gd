@@ -16,10 +16,15 @@ onready var _loading_bar = $CanvasLayer/main_ui/loading/VBoxContainer/loading_ba
 onready var _loading_turn = $CanvasLayer/main_ui/loading_turn
 onready var _loading_image = $CanvasLayer/main_ui/loading_turn/loading_anim/TextureRect
 
+onready var _game_over = $CanvasLayer/main_ui/game_over
+onready var _game_over_condition = $CanvasLayer/main_ui/game_over/VBoxContainer/condition
+onready var _game_over_message = $CanvasLayer/main_ui/game_over/VBoxContainer/winner
+
 func _ready():
 	_selection_mode_layout.visible = true
 	_unit_mode_layout.visible = false
 	_loading_turn.visible = false
+	_game_over.visible = false
 	display_loading(false)
 	set_process(false)
 	
@@ -55,21 +60,31 @@ func display_selected_unit(_show : bool):
 func display_unit_info():
 	pass
 	
+func display_game_over(_is_win : bool, _message : String):
+	_control.visible = false
+	_loading_turn.visible = false
+	_game_over.visible = true
+	_game_over_condition.text = "You win!" if _is_win else "You Lose!"
+	_game_over_message.text = "All enemy has been eliminated!" if _is_win else _message
+	
 func _on_find_movable_unit_btn_pressed():
 	emit_signal("find_movable_unit")
-
-
+	
 func _on_skip_turn_pressed():
 	emit_signal("skip_turn")
-
-
+	
 func _on_unit_info_pressed():
 	emit_signal("get_unit_info")
-
-
+	
 func _on_deselect_pressed():
 	display_selection_mode()
 	emit_signal("deselect_unit")
+	
+func _on_exit_button_pressed():
+	Network.disconnect_from_server()
+	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
+
+
 
 
 

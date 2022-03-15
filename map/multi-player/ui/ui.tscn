@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=1]
 [ext_resource path="res://map/multi-player/ui/ui.gd" type="Script" id=2]
@@ -10,11 +10,12 @@
 [ext_resource path="res://assets/ui/icon/time.png" type="Texture" id=8]
 [ext_resource path="res://assets/ui/icon/warning.png" type="Texture" id=9]
 [ext_resource path="res://assets/ui/icon/stop.png" type="Texture" id=10]
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_48.tres" type="DynamicFont" id=11]
 
-[sub_resource type="Animation" id=1]
+[sub_resource type="Animation" id=3]
 length = 0.001
 tracks/0/type = "value"
-tracks/0/path = NodePath("Label2:text")
+tracks/0/path = NodePath("loading:text")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/imported = false
@@ -30,7 +31,7 @@ tracks/0/keys = {
 resource_name = "loading_turn"
 loop = true
 tracks/0/type = "value"
-tracks/0/path = NodePath("Label2:text")
+tracks/0/path = NodePath("loading:text")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/imported = false
@@ -277,19 +278,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label2" type="Label" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
+[node name="loading" type="Label" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -206.5
-margin_top = -20.0
-margin_right = 206.5
-margin_bottom = 20.0
+margin_left = -300.0
+margin_top = -30.0
+margin_right = 300.0
+margin_bottom = 30.0
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_as_outline = 2
-custom_fonts/font = ExtResource( 1 )
+custom_fonts/font = ExtResource( 11 )
 text = "Waiting Turn"
 align = 1
 valign = 1
@@ -310,10 +311,84 @@ __meta__ = {
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
 autoplay = "loading_turn"
-anims/RESET = SubResource( 1 )
+anims/RESET = SubResource( 3 )
 anims/loading_turn = SubResource( 2 )
+
+[node name="game_over" type="Control" parent="CanvasLayer/main_ui"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/main_ui/game_over"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color( 0.0745098, 0.0745098, 0.0745098, 0.635294 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/main_ui/game_over"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="condition" type="Label" parent="CanvasLayer/main_ui/game_over/VBoxContainer"]
+margin_top = 371.0
+margin_right = 600.0
+margin_bottom = 431.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 11 )
+text = "Waiting Turn"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="winner" type="Label" parent="CanvasLayer/main_ui/game_over/VBoxContainer"]
+margin_top = 435.0
+margin_right = 600.0
+margin_bottom = 475.0
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 1 )
+text = "winner is ..."
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/main_ui/game_over/VBoxContainer"]
+margin_top = 479.0
+margin_right = 600.0
+margin_bottom = 559.0
+rect_min_size = Vector2( 0, 80 )
+
+[node name="exit_button" type="Button" parent="CanvasLayer/main_ui/game_over/VBoxContainer"]
+margin_left = 210.0
+margin_top = 563.0
+margin_right = 390.0
+margin_bottom = 653.0
+rect_min_size = Vector2( 180, 90 )
+size_flags_horizontal = 4
+custom_colors/font_color_disabled = Color( 0, 0, 0, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_fonts/font = ExtResource( 11 )
+text = "Exit"
 
 [connection signal="pressed" from="CanvasLayer/main_ui/control/selection_mode_layout/find_movable_unit_btn" to="." method="_on_find_movable_unit_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/control/selection_mode_layout/skip_turn" to="." method="_on_skip_turn_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/control/unit_mode_layout/unit_info" to="." method="_on_unit_info_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/control/unit_mode_layout/deselect" to="." method="_on_deselect_pressed"]
+[connection signal="pressed" from="CanvasLayer/main_ui/game_over/VBoxContainer/exit_button" to="." method="_on_exit_button_pressed"]

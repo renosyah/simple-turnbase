@@ -17,6 +17,16 @@ func init_client():
 	generate_terrain()
 	
 ############################################################
+# network
+func on_player_disynchronize(_player_name : String):
+	pass
+	
+func on_host_disconnected():
+	.on_host_disconnected()
+	Network.disconnect_from_server()
+	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
+	
+############################################################
 # ui
 func _on_ui_deselect_unit():
 	.play_audio_click()
@@ -121,6 +131,13 @@ func _on_unit_on_click(_unit : Unit):
 			
 		else:
 			play_audio_invalid_click()
+	
+func _on_unit_dead(_unit : Unit):
+	var winner = .check_game_over_condition(_unit_holder)
+	if not winner.empty():
+		_ui.display_game_over(winner.id == Global.player_data.id, "Winner is " + winner.name + "!")
+		
+	._on_unit_dead(_unit)
 	
 ############################################################
 # player status
