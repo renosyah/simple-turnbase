@@ -211,7 +211,7 @@ func _on_player_get_kick(_player):
 	rpc("_kick_player", _player)
 	
 func _on_back_pressed():
-	_dialog_exit_option.display_message("Attention!","Are you sure want bac to main menu?")
+	_dialog_exit_option.display_message("Attention!","Are you sure want back to main menu?")
 	_dialog_exit_option.visible = true
 	
 func _on_simple_dialog_option_on_yes():

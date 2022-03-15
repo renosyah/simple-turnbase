@@ -252,6 +252,7 @@ __meta__ = {
 }
 
 [node name="loading_turn" type="Control" parent="CanvasLayer/main_ui"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -315,6 +316,7 @@ anims/RESET = SubResource( 3 )
 anims/loading_turn = SubResource( 2 )
 
 [node name="game_over" type="Control" parent="CanvasLayer/main_ui"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2

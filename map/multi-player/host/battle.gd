@@ -63,9 +63,9 @@ func _on_ui_skip_turn():
 # terrain
 func generate_terrain():
 	randomize()
-	_terrain.size = 6 #int(rand_range(6, 8))
+	_terrain.size = int(rand_range(6, 8))
 	_terrain.map_seed = randi()
-	_terrain.density = 0.2 #rand_range(0.25, 0.55)
+	_terrain.density = rand_range(0.25, 0.55)
 	_terrain.generate()
 	
 func _on_terrain_on_terrain_ready():

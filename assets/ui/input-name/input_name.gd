@@ -24,6 +24,7 @@ func set_player_name(_name):
 	
 func _on_continue_pressed():
 	player_name = _input_name.text
+	visible = false
 	emit_signal("on_continue", player_name, html_color)
 	
 func _on_input_name_text_changed(new_text):

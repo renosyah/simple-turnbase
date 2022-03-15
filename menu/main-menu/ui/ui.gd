@@ -1,11 +1,13 @@
 extends Control
 
 onready var _server_browser = $CanvasLayer/server_browser
+onready var _input_name = $CanvasLayer/input_name
 onready var _dialog_exit_option = $CanvasLayer/simple_dialog_option
 
 func _ready():
-	_server_browser.start_finding()
 	_dialog_exit_option.visible = false
+	_input_name.visible = false
+	_server_browser.start_finding()
 	get_tree().set_quit_on_go_back(false)
 	get_tree().set_auto_accept_quit(false)
 	
@@ -28,6 +30,13 @@ func _on_join_pressed():
 
 func _on_server_browser_on_error(msg):
 	print(msg)
+
+func _on_setting_button_pressed():
+	_input_name.visible = true
+	
+func _on_input_name_on_continue(_player_name, html_color):
+	Global.player_data.name = _player_name
+	Global.save_player_data()
 	
 func _on_server_browser_on_join(info):
 	Global.mode = Global.MODE_JOIN
@@ -43,6 +52,11 @@ func _on_back_pressed():
 	
 func _on_simple_dialog_option_on_yes():
 	get_tree().quit()
+
+
+
+
+
 
 
 

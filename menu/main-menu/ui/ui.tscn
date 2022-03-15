@@ -1,10 +1,15 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://assets/ui/server-browser/server_browser.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=2]
 [ext_resource path="res://menu/main-menu/ui/ui.gd" type="Script" id=3]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_48.tres" type="DynamicFont" id=4]
 [ext_resource path="res://assets/ui/simple_dialog_option/simple_dialog_option.tscn" type="PackedScene" id=5]
+[ext_resource path="res://assets/ui/input-name/input_name.tscn" type="PackedScene" id=6]
+[ext_resource path="res://assets/button/bg_press.png" type="Texture" id=7]
+[ext_resource path="res://assets/button/bg.png" type="Texture" id=8]
+[ext_resource path="res://assets/ui/icon/setting.png" type="Texture" id=9]
+[ext_resource path="res://assets/ui/fonts/montserrat_eb_16.tres" type="DynamicFont" id=10]
 
 [node name="main_menu" type="Control"]
 anchor_right = 1.0
@@ -28,8 +33,8 @@ __meta__ = {
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_top = -212.0
-margin_bottom = -198.0
+margin_top = -353.0
+margin_bottom = -230.0
 custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_as_outline = 2
@@ -37,6 +42,27 @@ custom_fonts/font = ExtResource( 4 )
 text = "Simple
 Turn-base"
 align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label2" type="Label" parent="CanvasLayer/control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -70.0
+margin_top = -266.0
+margin_right = 152.0
+margin_bottom = -143.0
+size_flags_horizontal = 4
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_as_outline = 2
+custom_fonts/font = ExtResource( 10 )
+text = "By Renosyah"
+align = 2
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -83,7 +109,35 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="setting_button" type="TextureButton" parent="CanvasLayer/control"]
+self_modulate = Color( 0.203922, 0.203922, 0.203922, 1 )
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -90.0
+margin_top = 15.0
+margin_right = -10.0
+margin_bottom = 95.0
+texture_normal = ExtResource( 8 )
+texture_pressed = ExtResource( 7 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/control/setting_button"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+texture = ExtResource( 9 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="server_browser" parent="CanvasLayer" instance=ExtResource( 1 )]
+visible = false
+
+[node name="input_name" parent="CanvasLayer" instance=ExtResource( 6 )]
 visible = false
 
 [node name="simple_dialog_option" parent="CanvasLayer" instance=ExtResource( 5 )]
@@ -91,7 +145,9 @@ visible = false
 
 [connection signal="pressed" from="CanvasLayer/control/HBoxContainer/host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="CanvasLayer/control/HBoxContainer/join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="CanvasLayer/control/setting_button" to="." method="_on_setting_button_pressed"]
 [connection signal="close" from="CanvasLayer/server_browser" to="." method="_on_server_browser_close"]
 [connection signal="on_error" from="CanvasLayer/server_browser" to="." method="_on_server_browser_on_error"]
 [connection signal="on_join" from="CanvasLayer/server_browser" to="." method="_on_server_browser_on_join"]
+[connection signal="on_continue" from="CanvasLayer/input_name" to="." method="_on_input_name_on_continue"]
 [connection signal="on_yes" from="CanvasLayer/simple_dialog_option" to="." method="_on_simple_dialog_option_on_yes"]
