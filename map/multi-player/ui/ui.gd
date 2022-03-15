@@ -20,14 +20,27 @@ onready var _game_over = $CanvasLayer/main_ui/game_over
 onready var _game_over_condition = $CanvasLayer/main_ui/game_over/VBoxContainer/condition
 onready var _game_over_message = $CanvasLayer/main_ui/game_over/VBoxContainer/winner
 
+onready var _dialog_exit_option = $CanvasLayer/main_ui/simple_dialog_option
+
 func _ready():
 	_selection_mode_layout.visible = true
+	_dialog_exit_option.visible = false
 	_unit_mode_layout.visible = false
 	_loading_turn.visible = false
 	_game_over.visible = false
 	display_loading(false)
 	set_process(false)
 	
+func _notification(what):
+	match what:
+		MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+			_on_back_pressed()
+			return
+			
+		MainLoop.NOTIFICATION_WM_GO_BACK_REQUEST: 
+			_on_back_pressed()
+			return
+			
 func _process(delta):
 	_loading_image.rect_rotation += 5.0
 	
@@ -83,6 +96,15 @@ func _on_deselect_pressed():
 func _on_exit_button_pressed():
 	Network.disconnect_from_server()
 	get_tree().change_scene("res://menu/main-menu/main_menu.tscn")
+	
+func _on_back_pressed():
+	_dialog_exit_option.display_message("Attention!","Are you sure want quit?")
+	_dialog_exit_option.visible = true
+	
+func _on_simple_dialog_option_on_yes():
+	_on_exit_button_pressed()
+
+
 
 
 

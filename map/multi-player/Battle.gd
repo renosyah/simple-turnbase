@@ -26,8 +26,8 @@ func _ready():
 	game_flag = GAME_LOADING
 	get_joined_players()
 	add_audio_player()
-#	get_tree().set_quit_on_go_back(false)
-#	get_tree().set_auto_accept_quit(false)
+	get_tree().set_quit_on_go_back(false)
+	get_tree().set_auto_accept_quit(false)
 
 ################################################################
 # network connection watcher

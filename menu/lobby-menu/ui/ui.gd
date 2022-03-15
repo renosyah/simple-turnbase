@@ -1,5 +1,7 @@
 extends Control
 
+const ENABLE_BOT = false
+
 const BUTTON_BATTLE_ENABLE_COLOR = Color(0, 0.592157, 0.035294)
 const BUTTON_BATTLE_DISABLE_COLOR = Color(0.27451, 0.27451, 0.27451)
 
@@ -7,7 +9,6 @@ const PLAYER_STATUS_NOT_READY = "NOT_READY"
 const PLAYER_STATUS_READY = "READY"
 
 onready var _server_advertise = $server_advertise
-
 onready var _player_holder = $CanvasLayer/control/VBoxContainer/ScrollContainer/VBoxContainer
 
 onready var _scramble_button = $CanvasLayer/control/HBoxContainer/scramble
@@ -16,6 +17,7 @@ onready var _ready_button = $CanvasLayer/control/HBoxContainer/ready
 onready var _add_bot_button_icon = $CanvasLayer/control/VBoxContainer/PanelContainer/HBoxContainer/add_bot/ColorRect2
 
 onready var _exit_timer = $exit_timer
+onready var _dialog_exit_option = $CanvasLayer/simple_dialog_option
 
 ################################################################
 # sync lobby
@@ -65,7 +67,6 @@ remotesync func _kick_player(data : Dictionary):
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	_play_button.visible = is_server()
-	_add_bot_button_icon.visible = is_server()
 	_play_button.disabled = true
 	_play_button.self_modulate = BUTTON_BATTLE_DISABLE_COLOR
 	
@@ -73,12 +74,26 @@ func _ready():
 	_ready_button.self_modulate = BUTTON_BATTLE_ENABLE_COLOR
 	
 	_scramble_button.visible = is_server()
+	_add_bot_button_icon.visible = ENABLE_BOT
 	
 	if is_server():
 		_init_host()
 	else:
 		_init_join()
+		
+	get_tree().set_quit_on_go_back(false)
+	get_tree().set_auto_accept_quit(false)
 	
+func _notification(what):
+	match what:
+		MainLoop.NOTIFICATION_WM_QUIT_REQUEST:
+			_on_back_pressed()
+			return
+			
+		MainLoop.NOTIFICATION_WM_GO_BACK_REQUEST: 
+			_on_back_pressed()
+			return
+			
 ################################################################
 # host player section
 func _init_host():
@@ -169,6 +184,9 @@ func _on_add_bot_pressed():
 	if not is_server():
 		return
 		
+	if not ENABLE_BOT:
+		return
+		
 	if player_joined.size() >= Global.server.max_player:
 		return
 		
@@ -181,7 +199,7 @@ func fill_player_slot():
 	var is_all_ready = is_all_player_ready()
 	_play_button.disabled = (not is_all_ready)
 	_play_button.self_modulate = BUTTON_BATTLE_DISABLE_COLOR if (not is_all_ready) else BUTTON_BATTLE_ENABLE_COLOR
-	_add_bot_button_icon.visible = is_server() and player_joined.size() < Global.server.max_player
+	_add_bot_button_icon.visible = ENABLE_BOT and is_server() and player_joined.size() < Global.server.max_player
 	
 	for i in player_joined:
 		var item = preload("res://menu/lobby-menu/ui/item/item.tscn").instance()
@@ -214,6 +232,10 @@ func _on_player_get_kick(_player):
 	rpc("_kick_player", _player)
 	
 func _on_back_pressed():
+	_dialog_exit_option.display_message("Attention!","Are you sure want bac to main menu?")
+	_dialog_exit_option.visible = true
+	
+func _on_simple_dialog_option_on_yes():
 	if is_server():
 		_on_exit_timer_timeout()
 		return
@@ -256,10 +278,16 @@ func is_server():
 	return Global.mode == Global.MODE_HOST
 	
 func is_all_player_ready() -> bool:
+	if player_joined.size() == 1:
+		return false
+		
 	for i in player_joined:
 		if i.flag == PLAYER_STATUS_NOT_READY:
 			return false
 	return true
+
+
+
 
 
 

@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://assets/ui/server-browser/server_browser.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=2]
 [ext_resource path="res://menu/main-menu/ui/ui.gd" type="Script" id=3]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_48.tres" type="DynamicFont" id=4]
+[ext_resource path="res://assets/ui/simple_dialog_option/simple_dialog_option.tscn" type="PackedScene" id=5]
 
 [node name="main_menu" type="Control"]
 anchor_right = 1.0
@@ -85,8 +86,12 @@ __meta__ = {
 [node name="server_browser" parent="CanvasLayer" instance=ExtResource( 1 )]
 visible = false
 
+[node name="simple_dialog_option" parent="CanvasLayer" instance=ExtResource( 5 )]
+visible = false
+
 [connection signal="pressed" from="CanvasLayer/control/HBoxContainer/host" to="." method="_on_host_pressed"]
 [connection signal="pressed" from="CanvasLayer/control/HBoxContainer/join" to="." method="_on_join_pressed"]
 [connection signal="close" from="CanvasLayer/server_browser" to="." method="_on_server_browser_close"]
 [connection signal="on_error" from="CanvasLayer/server_browser" to="." method="_on_server_browser_on_error"]
 [connection signal="on_join" from="CanvasLayer/server_browser" to="." method="_on_server_browser_on_join"]
+[connection signal="on_yes" from="CanvasLayer/simple_dialog_option" to="." method="_on_simple_dialog_option_on_yes"]

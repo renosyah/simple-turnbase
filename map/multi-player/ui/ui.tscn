@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_32.tres" type="DynamicFont" id=1]
 [ext_resource path="res://map/multi-player/ui/ui.gd" type="Script" id=2]
@@ -11,6 +11,8 @@
 [ext_resource path="res://assets/ui/icon/warning.png" type="Texture" id=9]
 [ext_resource path="res://assets/ui/icon/stop.png" type="Texture" id=10]
 [ext_resource path="res://assets/ui/fonts/montserrat_eb_48.tres" type="DynamicFont" id=11]
+[ext_resource path="res://assets/ui/simple_dialog_option/simple_dialog_option.tscn" type="PackedScene" id=12]
+[ext_resource path="res://assets/ui/simple_dialog_option/simple_dialog_option.gd" type="Script" id=13]
 
 [sub_resource type="Animation" id=3]
 length = 0.001
@@ -251,7 +253,6 @@ __meta__ = {
 }
 
 [node name="loading_turn" type="Control" parent="CanvasLayer/main_ui"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -269,9 +270,9 @@ color = Color( 0.0980392, 0.0980392, 0.0980392, 0.109804 )
 anchor_left = 0.5
 anchor_right = 0.5
 margin_left = -138.0
-margin_top = 51.0
+margin_top = 100.0
 margin_right = 142.0
-margin_bottom = 221.0
+margin_bottom = 270.0
 rect_min_size = Vector2( 280, 170 )
 mouse_filter = 2
 __meta__ = {
@@ -299,7 +300,7 @@ __meta__ = {
 }
 
 [node name="TextureRect" type="TextureRect" parent="CanvasLayer/main_ui/loading_turn/loading_anim"]
-modulate = Color( 1, 1, 1, 0.541176 )
+modulate = Color( 1, 1, 1, 0.462745 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_pivot_offset = Vector2( 140, 85 )
@@ -387,8 +388,18 @@ custom_colors/font_color = Color( 1, 1, 1, 1 )
 custom_fonts/font = ExtResource( 11 )
 text = "Exit"
 
+[node name="simple_dialog_option" type="Control" parent="CanvasLayer/main_ui" instance=ExtResource( 12 )]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 13 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [connection signal="pressed" from="CanvasLayer/main_ui/control/selection_mode_layout/find_movable_unit_btn" to="." method="_on_find_movable_unit_btn_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/control/selection_mode_layout/skip_turn" to="." method="_on_skip_turn_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/control/unit_mode_layout/unit_info" to="." method="_on_unit_info_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/control/unit_mode_layout/deselect" to="." method="_on_deselect_pressed"]
 [connection signal="pressed" from="CanvasLayer/main_ui/game_over/VBoxContainer/exit_button" to="." method="_on_exit_button_pressed"]
+[connection signal="on_yes" from="CanvasLayer/main_ui/simple_dialog_option" to="." method="_on_simple_dialog_option_on_yes"]
