@@ -1,10 +1,15 @@
 extends Spatial
+class_name Terrain
 
+############################################################
+# signals
 signal on_terrain_ready
 signal on_finish_generate(_generated_grid)
 signal on_spawning_grid(task_done, max_task)
 signal on_grid_click(_node)
 
+############################################################
+# variables
 const GRIDS_BASE = {
 	0 : "",
 	1 : "res://assets/terrains/model/Base.obj",
@@ -41,9 +46,14 @@ export (int) var map_seed = 123456
 
 var generated_grid = []
 
+############################################################
+# Called when the node enters the scene tree for the first time.
+# override methods
 func _ready() -> void:
 	HexGrid.hex_scale = Vector2(1.18, 1.18) #Vector2(1.15, 1.15)
 	
+############################################################
+# function
 func generate():
 	generated_grid.clear()
 	
@@ -53,26 +63,7 @@ func generate():
 	simplex.period = 15
 	simplex.lacunarity = 1.5
 	simplex.persistence = 0.75
-	
-#	for x in range(-grid_width, grid_width):
-#		var tile_coordinates := Vector2.ZERO
-#		tile_coordinates.x = x * TILE_SIZE * cos(deg2rad(30))
-#		tile_coordinates.y = 0 if x % 2 == 0 else TILE_SIZE / 2
-#
-#		for y in range(-grid_height, grid_height):
-#			var axial_coordinate = HexGrid.get_hex_at(tile_coordinates).axial_coords
-#			var base_key = _get_base_grid_key(simplex.get_noise_2d(tile_coordinates.x, tile_coordinates.y))
-#			var top_key = _get_grid_top_key(base_key)
-#
-#			generated_grid.append({
-#				"is_walkable" : _check_is_walkable(base_key, top_key),
-#				"mesh_top" : GRIDS_TOP[top_key],
-#				"mesh_base" : GRIDS_BASE[base_key],
-#				"translation" : HexGrid.get_hex_center3(axial_coordinate),
-#				"axial_coordinate" : axial_coordinate,
-#			})
-#			tile_coordinates.y += TILE_SIZE
-			
+
 	var points = Utils.draw_hexagon_points(size)
 	for i in points:
 		if i["type"] == 1:
@@ -158,36 +149,43 @@ func _on_click(_node):
 	emit_signal("on_grid_click", _node)
 	
 	
+func get_adjacent_neighbors(from : HexGrid, _range : int = 1, _only_travel : bool = true) -> Array:
+	var adjacent_neighbors = []
+	for i in preload("res://addons/Hex/HexCell.gd").new(from.axial_coordinate).get_all_within(_range):
+		var _path = NodePath(str(_holder.get_path()) + "/" + Utils.create_grid_name(i.axial_coords))
+		var _node = get_node_or_null(_path)
+		if not is_instance_valid(_node):
+			continue
+			
+		if _only_travel:
+			if not is_instance_valid(_node.occupier):
+				adjacent_neighbors.append(_node)
+			
+		else:
+			adjacent_neighbors.append(_node)
 	
-func get_list_grid_path(from, to : Vector2) -> Array:
+	return adjacent_neighbors
+	
+	
+func get_list_grid_path(from, to : HexGrid) -> Array:
 	var exceptions = []
 	for i in _holder.get_children():
 		if not i.is_walkable or is_instance_valid(i.occupier):
 			exceptions.append(i.axial_coordinate)
 		
-	var hex_grid_paths = HexGrid.find_path(from, to, exceptions)
+	var hex_grid_paths = HexGrid.find_path(from.axial_coordinate, to.axial_coordinate, exceptions)
 		
 	var path = []
 	for i in hex_grid_paths:
 		var ac = i.axial_coords
-		if ac == from:
+		if ac == from.axial_coordinate:
 			continue
 			
 		var _node = get_node_or_null(str(_holder.get_path()) + "/" + Utils.create_grid_name(ac))
 		if is_instance_valid(_node):
 			path.append(_node)
-			
 		
 	return path
-	
-	
-	
-# cost still broken :(
-# get cost just count lengt of path
-# from get_list_grid_path
-func get_movement_cost(from, to : Vector2):
-	return HexGrid.get_move_cost(from, to)
-	
 	
 	
 func _get_base_grid_key(_noice_sample : float) -> int:

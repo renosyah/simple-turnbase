@@ -175,12 +175,8 @@ func is_my_turn(_player_id : String) -> bool:
 	
 ################################################################
  # unit
-func generate_units(_terrain_path : NodePath, _quantity : int = 1) -> Array:
+func generate_units(_terrain_node : Terrain, _quantity_for_each_player : int = 1) -> Array:
 	var units = []
-		
-	var _terrain_node = get_node_or_null(_terrain_path)
-	if not is_instance_valid(_terrain_node):
-		return units
 		
 	var _walkable_grids = []
 	for i in _terrain_node.get_grids():
@@ -188,7 +184,7 @@ func generate_units(_terrain_path : NodePath, _quantity : int = 1) -> Array:
 			_walkable_grids.append(i)
 			
 	for player in players:
-		for i in _quantity:
+		for i in _quantity_for_each_player:
 			var model = Monsters.MODELS[randi() % Monsters.MODELS.size()]
 			var _grid = _walkable_grids[randi() %  _walkable_grids.size()]
 			var _unit_data = {}
@@ -258,25 +254,16 @@ func _on_unit_dead(_unit : Unit):
 		_unit.current_grid.occupier = null
 	_unit.queue_free()
 	
-func count_movable_unit(_unit_holder_path : NodePath, _player_id : String) -> bool:
+func count_movable_unit(_unit_holder : Node, _player_id : String) -> bool:
 	var count = 0
-	var _unit_holder = get_node_or_null(_unit_holder_path)
-	if not is_instance_valid(_unit_holder):
-		return count
-		
 	for i in _unit_holder.get_children():
 		if i.team == _player_id and i.ap > 0:
 			count += 1
 		
 	return count
 	
-func get_all_unit(_unit_holder_path : NodePath, _player_id : String) -> Array:
+func get_all_unit(_unit_holder : Node, _player_id : String) -> Array:
 	var units = []
-	
-	var _unit_holder = get_node_or_null(_unit_holder_path)
-	if not is_instance_valid(_unit_holder):
-		return units
-		
 	for i in _unit_holder.get_children():
 		if i.team == _player_id:
 			units.append(i)
@@ -284,13 +271,8 @@ func get_all_unit(_unit_holder_path : NodePath, _player_id : String) -> Array:
 	return units
 	
 var _cycle_movable_unit_pos = 0
-func cycle_movable_unit(_unit_holder_path : NodePath, _player_id : String) -> Unit:
+func cycle_movable_unit(_unit_holder : Node, _player_id : String) -> Unit:
 	var units = []
-	
-	var _unit_holder = get_node_or_null(_unit_holder_path)
-	if not is_instance_valid(_unit_holder):
-		return null
-		
 	for i in _unit_holder.get_children():
 		if i.team == _player_id and i.ap > 0:
 			units.append(i)
@@ -306,19 +288,21 @@ func cycle_movable_unit(_unit_holder_path : NodePath, _player_id : String) -> Un
 
 ################################################################
  # unit movement
-func move_unit(_unit : Unit, _terrain : Spatial, from, to : Vector2):
+func move_unit(_unit : Unit, _terrain : Terrain, from, to : HexGrid):
 	if is_server():
 		_move_unit(
 			_unit.get_path(),
 			_terrain.get_path(),
-			from, to
+			from.get_path(),
+			to.get_path()
 		)
 		
 	else:
 		rpc_id(Network.PLAYER_HOST_ID,"_move_unit",
 			_unit.get_path(),
 			_terrain.get_path(),
-			from, to
+			from.get_path(),
+			to.get_path()
 		)
 		
 func attack_unit(_from_unit, _to_unit : Unit):
@@ -327,7 +311,7 @@ func attack_unit(_from_unit, _to_unit : Unit):
 	else:
 		rpc_id(Network.PLAYER_HOST_ID,"_attack_unit", _from_unit.get_path(), _to_unit.get_path())
 		
-remote func _move_unit(_unit_path : NodePath, _terrain_path : NodePath, from, to : Vector2):
+remote func _move_unit(_unit_path, _terrain_path, _from_path, _to_path: NodePath):
 	var _unit = get_node_or_null(_unit_path )
 	if not is_instance_valid(_unit):
 		return
@@ -336,7 +320,15 @@ remote func _move_unit(_unit_path : NodePath, _terrain_path : NodePath, from, to
 	if not is_instance_valid(_terrain):
 		return
 		
-	var waypoints = _terrain.get_list_grid_path(from, to)
+	var _from = get_node_or_null(_from_path)
+	if not is_instance_valid(_from):
+		return
+		
+	var _to = get_node_or_null(_to_path)
+	if not is_instance_valid(_to):
+		return
+		
+	var waypoints = _terrain.get_list_grid_path(_from, _to)
 	_unit.set_waypoints(waypoints)
 	
 	
@@ -350,31 +342,43 @@ remote func _attack_unit(_from_unit_path, _to_unit_path : NodePath):
 ############################################################
 # unit and grid selection
 func is_player_own_unit(_unit : Unit) -> bool:
+	if not is_instance_valid(_unit):
+		return false
+		
 	return _unit.team == Global.player_data.id
 	
 func is_this_currently_selected_unit(_unit : Unit) -> bool:
 	return _unit == selected_unit
 	
 func is_selected_unit_valid() -> bool:
-	return is_instance_valid(selected_unit) and selected_unit.ap > 0
+	if not is_instance_valid(selected_unit):
+		return false
+		
+	return selected_unit.ap > 0
 	
 func is_grid_is_highlight(_unit : Unit) -> bool:
+	if not _unit.is_current_grid_valid():
+		return false
+		
 	return _unit.current_grid.is_highlight()
 	
-func clear_highlight(_terrain : Spatial):
+func clear_highlight(_terrain : Terrain):
 	for i in _terrain.get_grids():
 		i.highlight(false)
 		
-		
-func highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
-	var grids_in_range = []
-	var enemy_in_range = []
 	
+func highlight_adjacent_grid(_terrain : Terrain, _unit : Unit):
 	if _unit.ap == 0:
 		return
 		
+	if not _unit.is_current_grid_valid():
+		return
+		
+	var grids_in_range = []
+	var enemy_in_range = []
+	
 		# check if any enemy near attack range
-	for i in _unit.current_grid.get_adjacent_neighbors(_unit.attack_range, false):
+	for i in _terrain.get_adjacent_neighbors(_unit.current_grid, _unit.attack_range, false):
 		if i.is_walkable:
 			if is_instance_valid(i.occupier):
 				if i.occupier.is_enemy(_unit.team):
@@ -393,7 +397,7 @@ func highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
 		return
 		
 	# no enemy, change travel mode
-	for i in _unit.current_grid.get_adjacent_neighbors(_unit.ap, true):
+	for i in _terrain.get_adjacent_neighbors(_unit.current_grid, _unit.ap, true):
 		if i.is_walkable and not is_instance_valid(i.occupier):
 			i.highlight(true, Color.white)
 	
@@ -401,7 +405,7 @@ func highlight_adjacent_grid(_terrain : Spatial, _unit : Unit):
 ############################################################
 # sound
 var audio_sfx : AudioStreamPlayer
-
+	
 func add_audio_player():
 	audio_sfx = AudioStreamPlayer.new()
 	audio_sfx.bus = "sfx"
@@ -426,44 +430,3 @@ func play_audio_unit_move():
 func play_audio_invalid_click():
 	audio_sfx.stream = preload("res://assets/sound/wrong_click.wav")
 	audio_sfx.play()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -26,11 +26,11 @@ func _on_ui_deselect_unit():
 func _on_ui_find_movable_unit():
 	.play_audio_click()
 	
-	var count = .count_movable_unit(_unit_holder.get_path(), Global.player_data.id)
+	var count = .count_movable_unit(_unit_holder, Global.player_data.id)
 	if count <= 0:
 		return
 		
-	var unit = .cycle_movable_unit(_unit_holder.get_path(), Global.player_data.id)
+	var unit = .cycle_movable_unit(_unit_holder, Global.player_data.id)
 	if not is_instance_valid(unit):
 		return
 		
@@ -64,18 +64,18 @@ func _on_terrain_on_finish_generate(_generated_grid : Array):
 func _on_terrain_on_spawning_grid(task_done, max_task : int):
 	_ui.display_loading_progress("Generating Map...", task_done, max_task)
 	
-func _on_terrain_on_grid_click(_node : StaticBody):
+func _on_terrain_on_grid_click(_grid : HexGrid):
 	if not .is_my_turn(Global.player_data.id):
 		.play_audio_click()
 		return
 		
-	if is_instance_valid(selected_unit) and _node.is_highlight():
-		if _node.is_walkable:
+	if is_instance_valid(selected_unit) and _grid.is_highlight():
+		if _grid.is_walkable:
 			.move_unit(
 				selected_unit,
 				_terrain,
-				selected_unit.current_grid.axial_coordinate,
-				_node.axial_coordinate
+				selected_unit.current_grid,
+				_grid
 			)
 			.play_audio_unit_move()
 			
