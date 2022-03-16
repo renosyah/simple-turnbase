@@ -1,4 +1,4 @@
-# Simple Turnbase (not actual tittle)
+# Hexios : Simple Turn-base
 
 the game top grid base movement (hexagon grid) with turn base strategy
 
@@ -29,27 +29,26 @@ link : [hexios-simple-turn-base from itch.io](https://renosyah.itch.io/hexios-si
 
 
 ## Gameplay
-![GitHub Logo](/ss/2.png)
+![GitHub Logo](/ss/cover.png)
 
 
 
-![GitHub Logo](/ss/3.png)
+![GitHub Logo](/ss/gameplay_1.png
+
+
+![GitHub Logo](/ss/gameplay_2.png)
 
 
 
-![GitHub Logo](/ss/4.png)
+![GitHub Logo](/ss/gameplay_3.png)
 
 
 
-![GitHub Logo](/ss/5.png)
+![GitHub Logo](/ss/gameplay_4.png)
 
 
 
-![GitHub Logo](/ss/6.png)
-
-
-
-![GitHub Logo](/ss/7.png)
+![GitHub Logo](/ss/gameplay_5.png)
 
 
 
