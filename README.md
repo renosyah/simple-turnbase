@@ -29,7 +29,7 @@ link : [hexios-simple-turn-base from itch.io](https://renosyah.itch.io/hexios-si
 
 
 ## Gameplay
-![GitHub Logo](/ss/cover.png)
+![GitHub Logo](/ss/game_cover.png)
 
 
 
