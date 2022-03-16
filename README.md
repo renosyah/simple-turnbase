@@ -33,7 +33,8 @@ link : [hexios-simple-turn-base from itch.io](https://renosyah.itch.io/hexios-si
 
 
 
-![GitHub Logo](/ss/gameplay_1.png
+![GitHub Logo](/ss/gameplay_1.png)
+
 
 
 ![GitHub Logo](/ss/gameplay_2.png)
